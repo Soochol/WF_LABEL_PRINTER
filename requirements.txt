@@ -1,0 +1,17 @@
+# 프린터 제어
+pyusb==1.2.1
+
+# 시리얼 통신
+pyserial==3.5
+
+# GUI
+PyQt6==6.6.1
+
+# 유틸리티
+python-dateutil==2.8.2
+pyyaml==6.0.1
+
+# 개발/테스트
+pytest==7.4.3
+pytest-qt==4.2.0
+black==23.12.1

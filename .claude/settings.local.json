@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv pip install:*)",
+      "Bash(if exist buildWF_Label_Printer rmdir /s /q buildWF_Label_Printer)",
+      "Bash(if exist dist rmdir /s /q dist)",
+      "Bash(uv run pyinstaller:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

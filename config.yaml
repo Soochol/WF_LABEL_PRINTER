@@ -1,0 +1,46 @@
+# Zebra Label Printer Configuration
+
+# 프린터 설정
+printer:
+  vendor_id: 0x0A5F  # Zebra VID
+  product_id: null   # null이면 자동 검색
+  default_template: "templates/PSA_LABEL_ZPL_with_mac_address.prn"
+
+# 시리얼 통신 설정
+serial:
+  port: "COM3"       # MCU 시리얼 포트 (Windows: COM3, Linux: /dev/ttyUSB0)
+  baudrate: 115200
+  timeout: 30        # MAC 수신 타임아웃 (초)
+  mac_pattern: "device id:\\s*([A-Z0-9]+)"
+
+# 데이터베이스 설정
+database:
+  path: "data/label_printer.db"
+  backup_enabled: true
+  backup_dir: "data/backups"
+  backup_interval: 3600  # 백업 주기 (초, 1시간)
+
+# 시리얼 번호 기본값
+serial_number:
+  model_code: "P10"
+  dev_code: "D"
+  robot_spec: "L0"
+  suite_spec: "S0"
+  hw_code: "H3"
+  assembly_code: "A0"
+  reserved: "0"
+  counter_start: "A00"
+
+# 로깅 설정
+logging:
+  level: "INFO"      # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  file: "logs/app.log"
+  max_size: 10485760  # 10MB
+  backup_count: 5
+
+# GUI 설정
+gui:
+  window_title: "Zebra Label Printer - WITHFORCE"
+  window_width: 1200
+  window_height: 800
+  theme: "default"   # default, dark
