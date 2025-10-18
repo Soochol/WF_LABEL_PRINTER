@@ -108,6 +108,7 @@ INSERT OR IGNORE INTO app_config (key, value, description) VALUES
     ('serial_timeout', '30', 'MAC 수신 타임아웃 (초)'),
     ('auto_increment', 'true', '생산순서 자동 증가 활성화'),
     ('use_mac_in_label', 'false', 'MAC 주소 라벨 사용 여부'),
+    ('auto_print_on_mac_detected', 'false', 'MAC 감지 시 자동 인쇄 활성화'),
     ('backup_enabled', 'true', 'DB 백업 활성화'),
     ('backup_interval', '3600', '백업 주기 (초)'),
     ('last_backup', '', '마지막 백업 시각');

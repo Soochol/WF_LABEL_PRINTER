@@ -77,6 +77,7 @@ class SettingsView(ComponentBase):
             'serial_timeout': self.detail_panel.serial_timeout_item.get_value(),
             'auto_increment': 'true' if self.detail_panel.auto_increment_item.get_value() == '사용' else 'false',
             'use_mac_in_label': 'true' if self.detail_panel.use_mac_item.get_value() == '사용' else 'false',
+            'auto_print_on_mac_detected': 'true' if self.detail_panel.auto_print_on_mac_item.get_value() == '사용' else 'false',
             'backup_enabled': 'true' if self.detail_panel.backup_enabled_item.get_value() == '사용' else 'false',
             'backup_interval': self.detail_panel.backup_interval_item.get_value()
         }
@@ -122,6 +123,11 @@ class SettingsView(ComponentBase):
         if 'use_mac_in_label' in settings:
             value = '사용' if settings['use_mac_in_label'] == 'true' else '사용 안 함'
             self.detail_panel.use_mac_item.set_value(value)
+
+        # MAC 감지 시 자동 인쇄
+        if 'auto_print_on_mac_detected' in settings:
+            value = '사용' if settings['auto_print_on_mac_detected'] == 'true' else '사용 안 함'
+            self.detail_panel.auto_print_on_mac_item.set_value(value)
 
         # 백업
         if 'backup_enabled' in settings:

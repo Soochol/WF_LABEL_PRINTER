@@ -384,7 +384,8 @@ class MainWindow(QMainWindow):
             setting_keys = [
                 'printer_selection', 'prn_template', 'serial_port',
                 'serial_baudrate', 'serial_timeout', 'auto_increment',
-                'use_mac_in_label', 'backup_enabled', 'backup_interval'
+                'use_mac_in_label', 'auto_print_on_mac_detected',
+                'backup_enabled', 'backup_interval'
             ]
 
             for key in setting_keys:
