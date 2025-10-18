@@ -266,20 +266,15 @@ class MainWindow(QMainWindow):
                 raise ValueError("PRN 템플릿이 설정되지 않았습니다. 설정 화면에서 템플릿을 선택하세요.")
 
             # 3. MAC 주소 확인 (라벨에 MAC 사용하는 경우만)
-            # [임시] 하드코딩된 MAC 주소 사용
-            mac_address = "PSAD0CF1327829495"
-            log(f"✓ MAC 주소 (하드코딩): {mac_address}")
-
-            # 원래 로직 (주석 처리)
-            # if use_mac_in_label:
-            #     if not self.latest_mac_address:
-            #         raise ValueError("MAC 주소가 감지되지 않았습니다. ESP32 전원을 확인하거나 '라벨 설정'에서 MAC 사용을 비활성화하세요.")
-            #     mac_address = self.latest_mac_address
-            #     log(f"✓ MAC 주소: {mac_address}")
-            # else:
-            #     # MAC 사용 안 함 - 더미 값 사용
-            #     mac_address = "NONE"
-            #     log("✓ MAC 주소 사용 안 함 (설정에서 비활성화됨)")
+            if use_mac_in_label:
+                if not self.latest_mac_address:
+                    raise ValueError("MAC 주소가 감지되지 않았습니다. ESP32 전원을 확인하거나 '라벨 설정'에서 MAC 사용을 비활성화하세요.")
+                mac_address = self.latest_mac_address
+                log(f"✓ MAC 주소: {mac_address}")
+            else:
+                # MAC 사용 안 함 - 더미 값 사용
+                mac_address = "NONE"
+                log("✓ MAC 주소 사용 안 함 (설정에서 비활성화됨)")
 
             # 4. 인쇄 실행
             mode_text = "테스트 인쇄" if test_mode else "인쇄"
