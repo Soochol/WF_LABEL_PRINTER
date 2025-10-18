@@ -267,10 +267,15 @@ class MainWindow(QMainWindow):
 
             # 3. MAC 주소 확인 (라벨에 MAC 사용하는 경우만)
             if use_mac_in_label:
-                if not self.latest_mac_address:
+                # 테스트 인쇄는 MAC 없이도 진행 가능
+                if not test_mode and not self.latest_mac_address:
                     raise ValueError("MAC 주소가 감지되지 않았습니다. ESP32 전원을 확인하거나 '라벨 설정'에서 MAC 사용을 비활성화하세요.")
-                mac_address = self.latest_mac_address
-                log(f"✓ MAC 주소: {mac_address}")
+
+                mac_address = self.latest_mac_address if self.latest_mac_address else "TEST-MAC"
+                if test_mode and not self.latest_mac_address:
+                    log(f"✓ MAC 주소 (테스트 모드): {mac_address}")
+                else:
+                    log(f"✓ MAC 주소: {mac_address}")
             else:
                 # MAC 사용 안 함 - 더미 값 사용
                 mac_address = "NONE"
