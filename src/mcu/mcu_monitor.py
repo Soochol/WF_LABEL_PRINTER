@@ -27,8 +27,9 @@ class MCUMonitor(QThread):
         self.running = True
         self.ser = None
 
-        # MAC 주소 패턴: device id: PSAD0CF1327829495
-        self.mac_pattern = re.compile(r'device id:\s*(PSA[A-Fa-f0-9]{13})')
+        # MAC 주소 패턴: device id: PSAD0CF132890A4A5 (총 17자)
+        # PSA(3자) + 14자 = 17자
+        self.mac_pattern = re.compile(r'device id:\s*(PSA[A-Fa-f0-9]{14})')
 
     def run(self):
         """백그라운드 모니터링 실행"""
