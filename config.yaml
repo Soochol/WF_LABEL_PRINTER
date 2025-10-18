@@ -4,7 +4,7 @@
 printer:
   vendor_id: 0x0A5F  # Zebra VID
   product_id: null   # null이면 자동 검색
-  default_template: "templates/PSA_LABEL_ZPL_with_mac_address.prn"
+  default_template: "prn/PSA_LABEL_ZPL_with_mac_address.prn"
 
 # 시리얼 통신 설정
 serial:

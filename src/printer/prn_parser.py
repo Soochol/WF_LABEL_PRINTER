@@ -113,14 +113,36 @@ class PRNParser:
 
         # ^FH\ 문제 해결: 바코드 데이터 바로 앞의 ^FH\를 제거
         # ZPL의 ^FH (Field Hex) 명령이 데이터를 잘못 해석하는 것을 방지
-        # 예: ^FH\^FDPSAD0CF... -> ^FDLA,PSAD0CF... (Alphanumeric mode)
 
-        # 2D 바코드 (QR Code) 처리
-        # ^BQ 명령어 다음 줄의 ^FH\^FD를 ^FDLA,로 변경
-        # 예: ^BQN,2,3 다음 줄 ^FH\^FD{data}^FS -> ^FDLA,{data}^FS
+        # 2D 바코드 (QR Code) 처리 - 두 가지 방식 적용
+        # 1) 시리얼 번호 QR: ^FDLA, 프리픽스 사용 (정상 작동 확인)
+        # 2) MAC 주소 QR: 프리픽스 없이 ^FD만 사용 (리더기 호환성)
+
+        # 시리얼 번호 QR 코드 처리
+        # VAR_2DBARCODE를 포함한 ^BQ 다음 줄만 LA 프리픽스 추가
+        zpl = re.sub(
+            r'(\^BQ[^\n]+\n)\^FH\\\^FD(' + re.escape(serial_number) + r')\^FS',
+            r'\1^FDLA,\2^FS',
+            zpl
+        )
+
+        # MAC 주소 QR 코드 처리
+        # MAC 주소를 포함한 ^BQ는 여러 방식 시도
+        # 옵션 1: MA (Manual) 모드
+        # 옵션 2: QA (QR Automatic) 모드
+        # 옵션 3: 프리픽스 없음
+        if mac_address:  # MAC 주소가 있는 경우만
+            # MA (Manual Encoding) 사용 - 리더기 호환성 높음
+            zpl = re.sub(
+                r'(\^BQ[^\n]+\n)\^FH\\\^FD(' + re.escape(mac_address) + r')\^FS',
+                r'\1^FDMA,\2^FS',
+                zpl
+            )
+
+        # 혹시 남은 ^BQ의 ^FH\ 처리 (fallback)
         zpl = re.sub(
             r'(\^BQ[^\n]+\n)\^FH\\\^FD',
-            r'\1^FDLA,',
+            r'\1^FD',
             zpl
         )
 
@@ -166,11 +188,8 @@ class PRNParser:
         if not self.SERIAL_PATTERN.match(serial_number):
             return False, f"시리얼 번호 형식이 올바르지 않습니다: {serial_number}"
 
-        # MAC 주소 검증
-        if not mac_address:
-            return False, "MAC 주소가 비어있습니다"
-
-        if not self.MAC_PATTERN.match(mac_address):
+        # MAC 주소 검증 (빈 문자열 허용: use_mac_in_label=false인 경우)
+        if mac_address and not self.MAC_PATTERN.match(mac_address):
             return False, f"MAC 주소는 영문 대문자와 숫자만 포함해야 합니다: {mac_address}"
 
         return True, ""

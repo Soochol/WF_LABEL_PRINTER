@@ -8,7 +8,7 @@ from .setting_item import (
     CheckboxSettingItem,
     SelectWithButtonSettingItem
 )
-from ...printer.printer_discovery import PrinterDiscovery
+from ...printer.zebra_win_controller import ZebraWinController
 import serial.tools.list_ports
 from pathlib import Path
 
@@ -27,7 +27,6 @@ class SettingsDetailPanel(QStackedWidget):
         self._create_printer_panel()
         self._create_serial_panel()
         self._create_automation_panel()
-        self._create_label_panel()
         self._create_backup_panel()
 
     def _create_scroll_panel(self, title):
@@ -178,25 +177,6 @@ class SettingsDetailPanel(QStackedWidget):
         self.addWidget(panel)
         self.panels["output.automation"] = self.indexOf(panel)
 
-    def _create_label_panel(self):
-        """라벨 설정 패널"""
-        panel, layout = self._create_scroll_panel("출력 > 라벨 설정")
-
-        # MAC 주소 사용
-        self.use_mac_item = CheckboxSettingItem(
-            "use_mac_in_label",
-            "Use MAC Address in Label",
-            default=True,
-            description="바코드 라벨 출력 시 MAC 주소를 포함합니다.",
-            theme=self.theme
-        )
-        self.use_mac_item.value_changed.connect(self._on_checkbox_changed)
-        layout.addWidget(self.use_mac_item)
-
-        layout.addStretch()
-
-        self.addWidget(panel)
-        self.panels["output.label"] = self.indexOf(panel)
 
     def _create_backup_panel(self):
         """백업 설정 패널"""
@@ -284,35 +264,32 @@ class SettingsDetailPanel(QStackedWidget):
         self.printer_item.combo.setCurrentIndex(0)
 
     def _scan_printers(self):
-        """프린터 검색"""
+        """프린터 검색 (시스템 프린터 큐)"""
+        options = ["자동 검색 (권장)"]
+
         try:
-            printers = PrinterDiscovery.find_all_printers()
-            options = ["자동 검색 (권장)"]
+            zebra_ctrl = ZebraWinController()
 
-            for printer in printers:
-                manufacturer = printer.get('manufacturer', 'Unknown')
-                product = printer.get('product', 'Unknown')
-                vid = printer.get('vendor_id', 0)
-                pid = printer.get('product_id', 0)
-                bus = printer.get('bus', '?')
-                address = printer.get('address', '?')
+            # 시스템 프린터 큐 목록 가져오기
+            queues = zebra_ctrl.get_available_printers()
 
-                vid_pid = f"VID:0x{vid:04X}, PID:0x{pid:04X}"
+            for queue in queues:
+                # Zebra 프린터만 표시
+                if 'zebra' in queue.lower() or 'zdesigner' in queue.lower() or 'zpl' in queue.lower():
+                    options.append(f"[프린터 큐] {queue}")
 
-                if manufacturer != 'Unknown' and product != 'Unknown':
-                    option_text = f"{manufacturer} {product} ({vid_pid}, Bus {bus}, Addr {address})"
-                else:
-                    option_text = f"USB Printer ({vid_pid}, Bus {bus}, Addr {address})"
-
-                options.append(option_text)
+            print(f"프린터 큐 검색 완료: {len(queues)}개 발견")
 
             if len(options) == 1:
-                options.append("연결된 프린터 없음")
+                options.append("연결된 프린터 없음 - 프린터 드라이버를 설치하세요")
 
             return options
+
         except Exception as e:
             print(f"프린터 검색 오류: {e}")
-            return ["자동 검색 (권장)", "연결된 프린터 없음"]
+            import traceback
+            traceback.print_exc()
+            return ["자동 검색 (권장)", "⚠️ 프린터 검색 오류 - 콘솔 메시지를 확인하세요"]
 
     def _scan_com_ports(self):
         """COM 포트 검색"""

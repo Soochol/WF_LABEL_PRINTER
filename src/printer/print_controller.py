@@ -1,9 +1,9 @@
 """인쇄 컨트롤러 - 인쇄 프로세스 오케스트레이션"""
 from pathlib import Path
 from datetime import datetime
-import usb.core
 from ..utils.serial_number_generator import SerialNumberGenerator
-from .printer_discovery import PrinterDiscovery
+from .zebra_win_controller import ZebraWinController
+from .prn_parser import PRNParser
 
 class PrintController:
     """인쇄 컨트롤러"""
@@ -12,11 +12,32 @@ class PrintController:
         self.project_root = Path(__file__).parent.parent.parent
 
     def _get_test_zpl_data(self) -> str:
-        """테스트 인쇄용 - ZEBRA TEST LABEL 문구 출력 (480x240 dots 라벨 크기)"""
-        return """^XA
+        """테스트 인쇄용 - PRN 템플릿의 모든 설정을 따르되 간단한 TEST LABEL 문구만 출력"""
+        return """CT~~CD,~CC^~CT~
+^XA
+~TA000
+~JSN
+^LT0
+^MNW
+^MTT
+^PON
+^PMN
+^LH0,0
+^JMA
+^PR1,1
+~SD28
+^JUS
+^LRN
+^CI27
+^PA0,1,1,0
+^XZ
+^XA
+^MMT
 ^PW480
 ^LL240
-^FO100,100^A0N,40,40^FDZEBRA TEST LABEL^FS
+^LS0
+^FT100,100^A0N,40,40^FDTEST LABEL^FS
+^PQ1,,,Y
 ^XZ"""
 
     def print_label(
@@ -107,93 +128,72 @@ class PrintController:
         mac_address: str,
         use_mac_in_label: bool = True
     ) -> str:
-        """PRN 템플릿 로드 및 변수 치환"""
+        """PRN 템플릿 로드 및 변수 치환 (PRNParser 사용)"""
         if not template_path.exists():
             raise FileNotFoundError(f"템플릿 파일을 찾을 수 없습니다: {template_path}")
 
-        # 템플릿 로드
-        with open(template_path, 'r', encoding='utf-8') as f:
-            template = f.read()
+        # PRNParser를 사용하여 변수 치환 및 ZPL 처리
+        parser = PRNParser(str(template_path))
 
-        # 변수 치환
-        date_str = datetime.now().strftime('%Y-%m-%d')
+        # 날짜 생성
+        date_str = datetime.now().strftime('%Y.%m.%d')
 
-        # 공통 변수 치환
-        zpl_data = template.replace('VAR_SERIALNUMBER', serial_number)
-        zpl_data = zpl_data.replace('VAR_DATE', date_str)
+        # MAC 주소 처리
+        mac_for_label = mac_address if use_mac_in_label else ''
 
-        # MAC 주소 사용하는 경우만 치환
-        if use_mac_in_label:
-            zpl_data = zpl_data.replace('VAR_MAC', mac_address)
-            zpl_data = zpl_data.replace('VAR_2DBARCODE', f'{serial_number}|{mac_address}')
+        # PRNParser의 replace_variables 메서드 사용
+        # 이 메서드는 변수 치환 + ^FH\ regex 처리를 모두 수행
+        zpl_data = parser.replace_variables(date_str, serial_number, mac_for_label)
+
+        # 디버깅: QR 코드 데이터 확인 및 ZPL 저장
+        lines = zpl_data.split('\n')
+        for i, line in enumerate(lines):
+            if '^BQ' in line and i + 1 < len(lines):
+                next_line = lines[i + 1]
+                print(f"[DEBUG] QR Code at line {i+1}:")
+                print(f"  Command: {line}")
+                print(f"  Data:    {next_line}")
+
+        # ZPL 데이터를 파일로 저장 (디버깅용)
+        debug_zpl_path = self.project_root / "debug_last_print.zpl"
+        with open(debug_zpl_path, 'w', encoding='utf-8') as f:
+            f.write(zpl_data)
+        print(f"[DEBUG] ZPL saved to: {debug_zpl_path}")
 
         return zpl_data
 
     def _send_to_printer(self, zpl_data: str, printer_selection: str):
-        """프린터로 ZPL 데이터 전송"""
-        # 프린터 선택
-        if printer_selection == "자동 검색 (권장)":
-            # 첫 번째 프린터 사용
-            printers = PrinterDiscovery.find_all_printers()
-            if not printers:
-                raise RuntimeError("사용 가능한 프린터가 없습니다")
-            printer_info = printers[0]
-        else:
-            # 특정 프린터 선택 (VID/PID 파싱)
-            # 예: "Zebra ZD420 (VID:0x0A5F, PID:0x0084, ...)"
-            printer_info = self._parse_printer_selection(printer_selection)
-
-        # USB 장치 찾기
-        backend = PrinterDiscovery._get_libusb_backend()
-        device = usb.core.find(
-            idVendor=printer_info['vendor_id'],
-            idProduct=printer_info['product_id'],
-            backend=backend
-        )
-
-        if device is None:
-            raise RuntimeError(f"프린터를 찾을 수 없습니다: VID=0x{printer_info['vendor_id']:04X}, PID=0x{printer_info['product_id']:04X}")
-
-        # 장치 설정
+        """프린터로 ZPL 데이터 전송 (시스템 프린터 큐 사용)"""
         try:
-            if device.is_kernel_driver_active(0):
-                device.detach_kernel_driver(0)
-        except:
-            pass
+            # ZebraWinController 사용
+            zebra_ctrl = ZebraWinController()
 
-        device.set_configuration()
+            # 프린터 선택
+            if printer_selection == "자동 검색 (권장)":
+                # 첫 번째 Zebra 프린터 자동 선택
+                zebra_printers = zebra_ctrl.get_zebra_printers()
+                if not zebra_printers:
+                    raise RuntimeError("시스템에 설치된 Zebra 프린터를 찾을 수 없습니다. 프린터 드라이버를 설치하세요.")
 
-        # Endpoint 찾기 (OUT endpoint)
-        cfg = device.get_active_configuration()
-        intf = cfg[(0, 0)]
+                queue_name = zebra_printers[0]
+                print(f"자동 선택된 프린터: {queue_name}")
+            else:
+                # 설정에서 선택한 프린터 사용
+                # "[프린터 큐] ZDesigner ZT231-203dpi ZPL" 형식으로 저장되어 있을 수 있음
+                if printer_selection.startswith("[프린터 큐] "):
+                    queue_name = printer_selection.replace("[프린터 큐] ", "")
+                else:
+                    # 이전 형식 또는 직접 입력된 큐 이름
+                    queue_name = printer_selection
+                print(f"선택된 프린터: {queue_name}")
 
-        ep_out = usb.util.find_descriptor(
-            intf,
-            custom_match=lambda e: usb.util.endpoint_direction(e.bEndpointAddress) == usb.util.ENDPOINT_OUT
-        )
+            # 프린터 연결
+            zebra_ctrl.connect(queue_name)
 
-        if ep_out is None:
-            raise RuntimeError("프린터 Endpoint를 찾을 수 없습니다")
+            # ZPL 전송
+            zebra_ctrl.send_zpl(zpl_data)
 
-        # ZPL 데이터 전송
-        zpl_bytes = zpl_data.encode('utf-8')
-        ep_out.write(zpl_bytes)
+            print(f"✓ 프린터로 ZPL 전송 완료 (큐: {queue_name})")
 
-        print(f"✓ 프린터로 {len(zpl_bytes)} 바이트 전송 완료")
-
-    def _parse_printer_selection(self, selection: str) -> dict:
-        """프린터 선택 문자열 파싱"""
-        # "Zebra ZD420 (VID:0x0A5F, PID:0x0084, Bus 1, Addr 5)"
-        # 또는 "USB Printer (VID:0x1234, PID:0x5678, ...)"
-
-        import re
-        vid_match = re.search(r'VID:0x([0-9A-Fa-f]+)', selection)
-        pid_match = re.search(r'PID:0x([0-9A-Fa-f]+)', selection)
-
-        if not vid_match or not pid_match:
-            raise ValueError(f"프린터 정보를 파싱할 수 없습니다: {selection}")
-
-        return {
-            'vendor_id': int(vid_match.group(1), 16),
-            'product_id': int(pid_match.group(1), 16)
-        }
+        except Exception as e:
+            raise RuntimeError(f"프린터 전송 실패: {e}")

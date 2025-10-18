@@ -1,6 +1,6 @@
 """
 Zebra 프린터 제어 (zebra 라이브러리 사용)
-Windows 프린터 큐를 통한 제어
+시스템 프린터 큐를 통한 제어
 """
 
 from typing import Optional, List
@@ -9,14 +9,14 @@ from zebra import Zebra
 
 class ZebraWinController:
     """
-    Windows 프린터 큐를 사용한 Zebra 프린터 제어
-    zebra 라이브러리 (0.2.1) 사용
+    시스템 프린터 큐를 사용한 Zebra 프린터 제어
+    zebra 라이브러리 사용
     """
 
     def __init__(self, queue_name: Optional[str] = None):
         """
         Args:
-            queue_name: Windows 프린터 큐 이름 (예: "ZDesigner ZT231-203dpi ZPL")
+            queue_name: 시스템 프린터 큐 이름 (예: "ZDesigner ZT231-203dpi ZPL")
                        None이면 나중에 설정
         """
         self.zebra = Zebra(queue_name)
@@ -70,7 +70,7 @@ class ZebraWinController:
         zebra_printers = self.get_zebra_printers()
 
         if not zebra_printers:
-            raise ValueError("No Zebra printer found in Windows printer queues")
+            raise ValueError("시스템 프린터 큐에서 Zebra 프린터를 찾을 수 없습니다")
 
         # 첫 번째 Zebra 프린터 사용
         self.queue_name = zebra_printers[0]
@@ -149,8 +149,8 @@ class ZebraWinController:
         return {
             "queue_name": self.queue_name,
             "is_connected": self._is_connected,
-            "library": "zebra 0.2.1",
-            "method": "Windows Print Queue"
+            "library": "zebra",
+            "method": "System Print Queue"
         }
 
     def __str__(self) -> str:

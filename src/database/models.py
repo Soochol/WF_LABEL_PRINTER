@@ -101,13 +101,13 @@ INSERT OR IGNORE INTO lot_config (
 
 -- 앱 설정 초기 데이터
 INSERT OR IGNORE INTO app_config (key, value, description) VALUES
-    ('printer_vendor_id', '0x0A5F', 'Zebra 프린터 VID'),
-    ('printer_product_id', '', '프린터 PID (빈값=자동검색)'),
+    ('printer_selection', '자동 검색 (권장)', '프린터 선택'),
+    ('prn_template', 'PSA_LABEL_ZPL_with_mac_address.prn', '기본 PRN 템플릿'),
     ('serial_port', 'COM3', 'MCU 시리얼 포트'),
     ('serial_baudrate', '115200', 'MCU 보드레이트'),
     ('serial_timeout', '30', 'MAC 수신 타임아웃 (초)'),
-    ('prn_template', 'PSA_LABEL_ZPL_with_mac_address.prn', '기본 PRN 템플릿'),
     ('auto_increment', 'true', '생산순서 자동 증가 활성화'),
+    ('use_mac_in_label', 'false', 'MAC 주소 라벨 사용 여부'),
     ('backup_enabled', 'true', 'DB 백업 활성화'),
     ('backup_interval', '3600', '백업 주기 (초)'),
     ('last_backup', '', '마지막 백업 시각');
