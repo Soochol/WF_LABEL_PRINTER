@@ -506,6 +506,13 @@ class MainWindow(QMainWindow):
         if home_view:
             home_view.set_mac_address(mac_address)
 
+        # MAC 감지 시 자동 인쇄
+        auto_print_enabled = self.db.get_config('auto_print_on_mac_detected') == 'true'
+        if auto_print_enabled:
+            print("→ MAC 감지 - 자동 인쇄 실행")
+            # 짧은 딜레이 후 자동 인쇄 (MAC 주소가 UI에 반영될 시간 확보)
+            QTimer.singleShot(100, self._on_print_requested)
+
     def _start_backup_timer(self):
         """백업 타이머 시작"""
         try:

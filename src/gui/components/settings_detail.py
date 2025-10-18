@@ -172,6 +172,18 @@ class SettingsDetailPanel(QStackedWidget):
         self.use_mac_item.value_changed.connect(self._on_mac_combo_changed)
         layout.addWidget(self.use_mac_item)
 
+        # MAC 감지 시 자동 인쇄
+        self.auto_print_on_mac_item = SelectSettingItem(
+            "auto_print_on_mac_detected",
+            "Auto Print on MAC Detected",
+            ["사용", "사용 안 함"],
+            default="사용 안 함",
+            description="MAC 주소 감지 시 자동으로 라벨을 인쇄합니다.",
+            theme=self.theme
+        )
+        self.auto_print_on_mac_item.value_changed.connect(self._on_auto_print_mac_combo_changed)
+        layout.addWidget(self.auto_print_on_mac_item)
+
         layout.addStretch()
 
         self.addWidget(panel)
@@ -253,6 +265,11 @@ class SettingsDetailPanel(QStackedWidget):
 
     def _on_mac_combo_changed(self, key, value):
         """MAC 콤보박스 값 변경 시 - '사용'/'사용 안 함'을 'true'/'false'로 변환"""
+        str_value = 'true' if value == '사용' else 'false'
+        self.setting_changed.emit(key, str_value)
+
+    def _on_auto_print_mac_combo_changed(self, key, value):
+        """MAC 자동 인쇄 콤보박스 값 변경 시 - '사용'/'사용 안 함'을 'true'/'false'로 변환"""
         str_value = 'true' if value == '사용' else 'false'
         self.setting_changed.emit(key, str_value)
 
