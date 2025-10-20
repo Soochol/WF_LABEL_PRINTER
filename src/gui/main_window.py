@@ -1,3 +1,6 @@
+import sys
+import os
+from pathlib import Path
 from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout
 from PyQt6.QtCore import QTimer
 from .core import Theme
@@ -40,7 +43,17 @@ class MainWindow(QMainWindow):
         """)
 
         # ========== 4. 데이터베이스 초기화 ==========
-        self.db = DBManager("data/label_printer.db")
+        # 데이터베이스 경로 설정
+        if getattr(sys, 'frozen', False):
+            # PyInstaller로 패키징된 경우 - AppData 사용 (관리자 권한 불필요)
+            self.app_base_dir = Path(os.environ.get('LOCALAPPDATA', os.path.expanduser('~'))) / "WF_Label_Printer"
+            db_path = self.app_base_dir / "data" / "label_printer.db"
+        else:
+            # 개발 환경 - 프로젝트 루트의 data 폴더 사용
+            self.app_base_dir = Path(__file__).parent.parent.parent
+            db_path = self.app_base_dir / "data" / "label_printer.db"
+
+        self.db = DBManager(str(db_path))
         self.db.initialize()
 
         # ========== 4-1. 인쇄 컨트롤러 초기화 ==========
@@ -112,6 +125,7 @@ class MainWindow(QMainWindow):
         if history_view:
             history_view.search_requested.connect(self._on_history_search)
             history_view.refresh_requested.connect(self._on_history_refresh)
+            history_view.delete_requested.connect(self._on_history_delete)
 
     def load_home_data(self):
         """홈 화면 데이터 로드"""
@@ -217,6 +231,18 @@ class MainWindow(QMainWindow):
         def log(msg):
             """로그 출력 (콘솔만)"""
             print(msg)
+
+        print(f"\n[DEBUG MainWindow] _do_print 시작 (test_mode={test_mode})")
+        print(f"[DEBUG MainWindow] home_view = {home_view}")
+        print(f"[DEBUG MainWindow] home_view type = {type(home_view)}")
+
+        # 인쇄 시작 - 버튼 비활성화
+        if home_view:
+            print(f"[DEBUG MainWindow] 버튼 비활성화 호출 중...")
+            home_view.set_print_buttons_enabled(False)
+            print(f"[DEBUG MainWindow] 버튼 비활성화 호출 완료")
+        else:
+            print(f"[DEBUG MainWindow] ⚠️ home_view가 None입니다!")
 
         try:
             # 0. 프린터 상태 체크
@@ -351,6 +377,15 @@ class MainWindow(QMainWindow):
             # 사용자에게 에러 토스트 표시
             self.toast.show_error(error_msg, duration=5000)
 
+        finally:
+            # 인쇄 완료/실패 - 버튼 다시 활성화
+            print(f"\n[DEBUG MainWindow] finally 블록 - 버튼 활성화 시작")
+            if home_view:
+                home_view.set_print_buttons_enabled(True)
+                print(f"[DEBUG MainWindow] 버튼 활성화 완료")
+            else:
+                print(f"[DEBUG MainWindow] ⚠️ finally: home_view가 None입니다!")
+
     def _on_config_saved(self, config):
         """LOT 설정 저장"""
         print("LOT 설정 저장:", config)
@@ -450,6 +485,52 @@ class MainWindow(QMainWindow):
             print(f"이력 새로고침 오류: {e}")
             self.toast.show_error(f"새로고침 실패: {str(e)}")
 
+    def _on_history_delete(self, record_id):
+        """이력 삭제 처리
+
+        Args:
+            record_id: 삭제할 레코드 ID
+        """
+        try:
+            # DB에서 삭제
+            success = self.db.delete_print_history(record_id)
+
+            if not success:
+                self.toast.show_error("삭제할 항목을 찾을 수 없습니다.")
+                return
+
+            # 삭제 성공 메시지
+            self.toast.show_success("이력이 삭제되었습니다.")
+
+            # 이력 화면 새로고침
+            self._on_history_refresh()
+
+            # 가장 최근 이력의 생산순서로 업데이트
+            latest_history = self.db.get_print_history(limit=1)
+
+            if latest_history:
+                # 시리얼 번호에서 마지막 4자리 (생산순서) 추출
+                serial_number = latest_history[0]['serial_number']
+                # 시리얼 형식: P10-DL0S0H3A0C100001-0
+                # 마지막 하이픈 이전의 마지막 4자리가 생산순서
+                parts = serial_number.split('-')
+                if len(parts) >= 2:
+                    lot_with_seq = parts[1]  # DL0S0H3A0C100001
+                    sequence = lot_with_seq[-4:]  # 0001
+
+                    # LOT 설정 업데이트
+                    self.db.update_lot_config(production_sequence=sequence)
+            else:
+                # 이력이 없으면 0001로 초기화
+                self.db.update_lot_config(production_sequence="0001")
+
+            # 홈 화면의 다음 시리얼 번호 업데이트
+            self.load_home_data()
+
+        except Exception as e:
+            print(f"이력 삭제 오류: {e}")
+            self.toast.show_error(f"삭제 실패: {str(e)}")
+
     def _check_printer_status(self):
         """프린터 연결 상태 체크"""
         try:
@@ -536,10 +617,21 @@ class MainWindow(QMainWindow):
             # 백업 파일명 생성 (타임스탬프 포함)
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
             backup_filename = f"label_printer_{timestamp}.db"
-            backup_path = f"backup/{backup_filename}"
+
+            # 백업 경로 결정
+            user_backup_path = self.db.get_config('backup_path')
+
+            if user_backup_path and user_backup_path.strip():
+                # 사용자가 지정한 절대 경로
+                backup_dir = Path(user_backup_path)
+            else:
+                # 기본 경로 (AppData 또는 프로젝트 루트)
+                backup_dir = self.app_base_dir / "backup"
+
+            backup_path = backup_dir / backup_filename
 
             # 백업 실행
-            self.db.backup(backup_path)
+            self.db.backup(str(backup_path))
             print(f"✓ 자동 백업 완료: {backup_path}")
 
         except Exception as e:

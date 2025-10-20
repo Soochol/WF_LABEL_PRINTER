@@ -14,6 +14,7 @@ class HistoryView(ComponentBase):
     # Signals
     search_requested = pyqtSignal(dict)  # 검색 요청
     refresh_requested = pyqtSignal()     # 새로고침 요청
+    delete_requested = pyqtSignal(int)   # 삭제 요청 (record_id)
 
     def __init__(self, theme=None, parent=None):
         super().__init__(parent)
@@ -45,6 +46,28 @@ class HistoryView(ComponentBase):
         """)
         header_layout.addWidget(title)
         header_layout.addStretch()
+
+        # 삭제 버튼
+        delete_btn = QPushButton("삭제")
+        delete_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {self.theme.colors.WHITE};
+                color: {self.theme.colors.ERROR};
+                border: 1px solid {self.theme.colors.GRAY_300};
+                border-radius: 8px;
+                padding: 10px 20px;
+                font-weight: {self.theme.fonts.MEDIUM};
+                font-size: {self.theme.fonts.BODY}px;
+            }}
+            QPushButton:hover {{
+                background-color: #FEE;
+                border-color: {self.theme.colors.ERROR};
+            }}
+        """)
+        delete_btn.setFixedHeight(40)
+        delete_btn.setFixedWidth(100)
+        delete_btn.clicked.connect(self._on_delete)
+        header_layout.addWidget(delete_btn)
 
         # 새로고침 버튼
         refresh_btn = QPushButton("새로고침")
@@ -167,6 +190,45 @@ class HistoryView(ComponentBase):
         """초기화 - 전체 기록 표시"""
         self.refresh_requested.emit()
 
+    def _on_delete(self):
+        """선택한 이력 삭제"""
+        from PyQt6.QtWidgets import QMessageBox
+
+        # 선택된 행 가져오기
+        selected_rows = self.table.selectionModel().selectedRows()
+        if not selected_rows:
+            QMessageBox.warning(self, "삭제", "삭제할 항목을 선택해주세요.")
+            return
+
+        row = selected_rows[0].row()
+
+        # 행에서 record_id 가져오기 (첫 번째 컬럼의 UserRole 데이터로 저장됨)
+        item = self.table.item(row, 0)
+        if not item:
+            return
+
+        record_id = item.data(Qt.ItemDataRole.UserRole)
+        if not record_id:
+            return
+
+        # 삭제 확인
+        serial_number = self.table.item(row, 0).text()
+        mac_address = self.table.item(row, 1).text()
+
+        reply = QMessageBox.question(
+            self,
+            "삭제 확인",
+            f"다음 항목을 삭제하시겠습니까?\n\n"
+            f"시리얼 번호: {serial_number}\n"
+            f"MAC 주소: {mac_address}",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            # 삭제 요청 시그널 발생
+            self.delete_requested.emit(record_id)
+
 
     def set_history(self, history_list, update_count=True):
         """이력 데이터 설정
@@ -185,8 +247,10 @@ class HistoryView(ComponentBase):
             row_idx = self.table.rowCount()
             self.table.insertRow(row_idx)
 
-            # 시리얼 번호
-            self.table.setItem(row_idx, 0, QTableWidgetItem(record.get('serial_number', '')))
+            # 시리얼 번호 (record_id를 UserRole에 저장)
+            serial_item = QTableWidgetItem(record.get('serial_number', ''))
+            serial_item.setData(Qt.ItemDataRole.UserRole, record.get('id'))  # ID 저장
+            self.table.setItem(row_idx, 0, serial_item)
 
             # MAC 주소
             self.table.setItem(row_idx, 1, QTableWidgetItem(record.get('mac_address', '')))

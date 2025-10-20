@@ -30,7 +30,8 @@ class DBManager:
         Args:
             db_path: SQLite DB 파일 경로
         """
-        self.db_path = db_path
+        # 항상 절대 경로로 변환
+        self.db_path = str(Path(db_path).resolve())
         self.conn: Optional[sqlite3.Connection] = None
 
     def connect(self) -> None:
@@ -39,8 +40,12 @@ class DBManager:
             return
 
         # 디렉토리 생성
-        db_dir = Path(self.db_path).parent
-        db_dir.mkdir(parents=True, exist_ok=True)
+        db_path_obj = Path(self.db_path)
+        db_dir = db_path_obj.parent
+
+        # 디렉토리가 없으면 생성
+        if not db_dir.exists():
+            db_dir.mkdir(parents=True, exist_ok=True)
 
         self.conn = sqlite3.connect(self.db_path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row  # dict 형태로 결과 반환
@@ -171,6 +176,25 @@ class DBManager:
         cursor.execute(query, params)
 
         return [dict(row) for row in cursor.fetchall()]
+
+    def delete_print_history(self, record_id: int) -> bool:
+        """
+        출력 이력 삭제
+
+        Args:
+            record_id: 삭제할 레코드 ID
+
+        Returns:
+            삭제 성공 여부
+        """
+        try:
+            self.connect()
+            cursor = self.conn.cursor()
+            cursor.execute("DELETE FROM print_history WHERE id = ?", (record_id,))
+            self.conn.commit()
+            return cursor.rowcount > 0
+        except Exception as e:
+            raise DatabaseError(f"이력 삭제 오류: {e}")
 
     def get_max_sequence_for_lot(self, lot_number: str) -> Optional[int]:
         """

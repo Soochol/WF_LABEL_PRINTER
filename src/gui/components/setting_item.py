@@ -297,3 +297,31 @@ class SelectWithButtonSettingItem(SelectSettingItem):
         """)
         self.button.clicked.connect(self.button_clicked.emit)
         self.input_layout.addWidget(self.button, 0)
+
+
+class InputWithButtonSettingItem(InputSettingItem):
+    """입력 필드 + 버튼 설정 항목"""
+
+    button_clicked = pyqtSignal()
+
+    def __init__(self, setting_key, label, button_text, placeholder="", default="", description="", theme=None, parent=None):
+        super().__init__(setting_key, label, placeholder, default, description, theme, parent)
+
+        # 버튼 추가
+        self.button = QPushButton(button_text)
+        self.button.setFixedHeight(LayoutSystem.INPUT_HEIGHT)
+        self.button.setFixedWidth(120)
+        self.button.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {self.theme.colors.GRAY_100};
+                border: {LayoutSystem.BORDER_WIDTH}px solid {self.theme.colors.GRAY_300};
+                border-radius: {LayoutSystem.BORDER_RADIUS}px;
+                font-size: {self.theme.fonts.BODY}px;
+                color: {self.theme.colors.GRAY_700};
+            }}
+            QPushButton:hover {{
+                background-color: {self.theme.colors.GRAY_200};
+            }}
+        """)
+        self.button.clicked.connect(self.button_clicked.emit)
+        self.input_layout.addWidget(self.button, 0)

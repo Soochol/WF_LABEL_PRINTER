@@ -111,6 +111,7 @@ INSERT OR IGNORE INTO app_config (key, value, description) VALUES
     ('auto_print_on_mac_detected', 'false', 'MAC 감지 시 자동 인쇄 활성화'),
     ('backup_enabled', 'true', 'DB 백업 활성화'),
     ('backup_interval', '3600', '백업 주기 (초)'),
+    ('backup_path', '', '백업 폴더 경로 (비어있으면 기본 경로 사용)'),
     ('last_backup', '', '마지막 백업 시각');
 
 -- 코드 마스터 초기 데이터

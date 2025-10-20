@@ -1,5 +1,6 @@
 # 프린터 제어
 pyusb==1.2.1
+pywin32>=305  # Windows 프린터 상태 확인용
 
 # 시리얼 통신
 pyserial==3.5

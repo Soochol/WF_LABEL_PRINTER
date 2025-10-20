@@ -1,12 +1,13 @@
 """설정 상세 패널 (VSCode 스타일)"""
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QScrollArea, QStackedWidget
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QScrollArea, QStackedWidget, QFileDialog
 from PyQt6.QtCore import pyqtSignal, Qt, QTimer
 from ..core import Theme, LayoutSystem
 from .setting_item import (
     SelectSettingItem,
     InputSettingItem,
     CheckboxSettingItem,
-    SelectWithButtonSettingItem
+    SelectWithButtonSettingItem,
+    InputWithButtonSettingItem
 )
 from ...printer.zebra_win_controller import ZebraWinController
 import serial.tools.list_ports
@@ -218,22 +219,46 @@ class SettingsDetailPanel(QStackedWidget):
         self.backup_interval_item.value_changed.connect(self.setting_changed.emit)
         layout.addWidget(self.backup_interval_item)
 
-        # 백업 경로 (읽기 전용 표시)
-        self.backup_path_item = InputSettingItem(
+        # 백업 경로 (폴더 선택 버튼 포함)
+        self.backup_path_item = InputWithButtonSettingItem(
             "backup_path",
             "Backup Path",
-            placeholder="backup/",
-            default="backup/",
-            description="백업 파일이 저장되는 경로입니다. (읽기 전용)",
+            "폴더 선택",
+            placeholder="기본 경로 (비어있으면 AppData 사용)",
+            default="",
+            description="백업 파일이 저장되는 폴더 경로입니다. 비어있으면 기본 경로를 사용합니다.",
             theme=self.theme
         )
-        self.backup_path_item.input.setReadOnly(True)
+        self.backup_path_item.input.setReadOnly(True)  # 직접 입력 불가, 버튼으로만 선택
+        self.backup_path_item.button_clicked.connect(self._on_select_backup_path)
+        self.backup_path_item.value_changed.connect(self.setting_changed.emit)
         layout.addWidget(self.backup_path_item)
 
         layout.addStretch()
 
         self.addWidget(panel)
         self.panels["system.backup"] = self.indexOf(panel)
+
+    def _on_select_backup_path(self):
+        """백업 경로 폴더 선택 대화상자"""
+        # 현재 경로 가져오기
+        current_path = self.backup_path_item.get_value()
+        if not current_path or not Path(current_path).exists():
+            current_path = str(Path.home())  # 기본값: 사용자 홈 디렉토리
+
+        # 폴더 선택 대화상자
+        folder = QFileDialog.getExistingDirectory(
+            self,
+            "백업 폴더 선택",
+            current_path,
+            QFileDialog.Option.ShowDirsOnly
+        )
+
+        if folder:
+            # 선택한 폴더 경로를 입력 필드에 설정
+            self.backup_path_item.set_value(folder)
+            # 설정 변경 이벤트 발생
+            self.setting_changed.emit("backup_path", folder)
 
     def _on_backup_enabled_changed(self, key, value):
         """백업 활성화 콤보박스 값 변경 시 - '사용'/'사용 안 함'을 'true'/'false'로 변환"""
