@@ -91,11 +91,12 @@ class MainWindow(QMainWindow):
 
         # ========== 7. 초기 데이터 로드 ==========
         QTimer.singleShot(100, self.load_home_data)
-        QTimer.singleShot(150, self.load_settings)
-        QTimer.singleShot(200, self._on_history_refresh)
-        QTimer.singleShot(300, self._check_printer_status)
-        QTimer.singleShot(400, self._start_mcu_monitor)
-        QTimer.singleShot(500, self._start_backup_timer)
+        QTimer.singleShot(150, self.load_lot_config)
+        QTimer.singleShot(200, self.load_settings)
+        QTimer.singleShot(250, self._on_history_refresh)
+        QTimer.singleShot(350, self._check_printer_status)
+        QTimer.singleShot(450, self._start_mcu_monitor)
+        QTimer.singleShot(550, self._start_backup_timer)
 
         # ========== 8. 디버그 모드 (개발용) ==========
         if debug_mode or Theme.DEBUG:
@@ -407,6 +408,24 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print(f"설정 저장 오류: {e}")
 
+    def load_lot_config(self):
+        """LOT 설정 화면 데이터 로드"""
+        try:
+            config_view = self.main_layout.get_view("config")
+            if not config_view:
+                return
+
+            # DB에서 LOT 설정 로드
+            lot_config = self.db.get_lot_config()
+
+            # LOT 설정 뷰에 적용
+            if lot_config:
+                config_view.set_config(lot_config)
+                print(f"✓ LOT 설정 로드 완료")
+
+        except Exception as e:
+            print(f"LOT 설정 로드 오류: {e}")
+
     def load_settings(self):
         """설정 화면 데이터 로드"""
         try:
@@ -420,7 +439,7 @@ class MainWindow(QMainWindow):
                 'printer_selection', 'prn_template', 'serial_port',
                 'serial_baudrate', 'serial_timeout', 'auto_increment',
                 'use_mac_in_label', 'auto_print_on_mac_detected',
-                'backup_enabled', 'backup_interval'
+                'backup_enabled', 'backup_interval', 'backup_path'
             ]
 
             for key in setting_keys:
