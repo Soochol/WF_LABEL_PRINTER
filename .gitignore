@@ -4,19 +4,7 @@ __pycache__/
 *$py.class
 *.so
 .Python
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
 *.egg
 
 # Virtual Environment
@@ -34,7 +22,6 @@ env/
 # Database
 *.db
 data/*.db
-data/backups/
 
 # Logs
 *.log
@@ -53,8 +40,15 @@ htmlcov/
 *.bak
 *.backup
 
-# PyInstaller Build Output
-build/WF_Label_Printer/
+# Build Output (exclude results, keep scripts)
+build/application/
+build/installer/
+build/temp/
 dist/
+
+# Debug files
+debug_*.zpl
 *.manifest
-*.exe
+
+# Claude settings (local only)
+.claude/settings.local.json
