@@ -13,7 +13,7 @@ class MCUMonitor(QThread):
     connection_status_changed = pyqtSignal(str, str)  # (status, detail)
     mac_detected = pyqtSignal(str)  # MAC 주소
 
-    def __init__(self, port: str, baudrate: int = 115200, timeout: int = 1):
+    def __init__(self, port: str, baudrate: int = 115200, timeout: float = 0.5):
         """
         Args:
             port: COM 포트 (예: "COM5")
@@ -27,9 +27,9 @@ class MCUMonitor(QThread):
         self.running = True
         self.ser = None
 
-        # MAC 주소 패턴: device id: PSAD0CF132890A4A5 (총 17자)
+        # MAC 주소 패턴: PSAD0CF1336A13031/subTopic (총 17자)
         # PSA(3자) + 14자 = 17자
-        self.mac_pattern = re.compile(r'device id:\s*(PSA[A-Fa-f0-9]{14})')
+        self.mac_pattern = re.compile(r'(PSA[A-Fa-f0-9]{14})/subTopic')
 
     def run(self):
         """백그라운드 모니터링 실행"""
@@ -76,8 +76,11 @@ class MCUMonitor(QThread):
             # 연결 실패
             self.connection_status_changed.emit("disconnected", "")
             print(f"✗ MCU 연결 실패: {e}")
-            # 5초 대기 후 재시도
-            time.sleep(5)
+            # 5초 대기 후 재시도 (0.5초씩 체크하여 빠른 종료 가능)
+            for _ in range(10):
+                if not self.running:
+                    return
+                time.sleep(0.5)
 
     def _read_data(self):
         """시리얼 데이터 읽기"""
@@ -107,7 +110,11 @@ class MCUMonitor(QThread):
         """에러 처리"""
         self._close()
         self.connection_status_changed.emit("reconnecting", self.port)
-        time.sleep(5)  # 5초 대기 후 재시도
+        # 5초 대기 후 재시도 (0.5초씩 체크하여 빠른 종료 가능)
+        for _ in range(10):
+            if not self.running:
+                return
+            time.sleep(0.5)
 
     def _close(self):
         """시리얼 포트 닫기"""
@@ -122,4 +129,4 @@ class MCUMonitor(QThread):
         """모니터링 중지"""
         self.running = False
         self._close()
-        self.wait()  # 스레드 종료 대기
+        self.wait(2000)  # 최대 2초만 대기 (밀리초 단위)
