@@ -1,0 +1,129 @@
+/* === Sidebar Styles === */
+
+/* Sidebar Container */
+QWidget[objectName="Sidebar"],
+Sidebar {
+    background-color: @gray-50;
+    border-right: @border-width solid @gray-200;
+}
+
+/* Sidebar Logo Area */
+QWidget[objectName="SidebarLogo"] {
+    background-color: transparent;
+}
+
+QWidget[objectName="SidebarLogo"] QLabel {
+    font-size: @font-h3;
+    font-weight: @font-bold;
+    color: @gray-900;
+    background: transparent;
+}
+
+/* Sidebar Navigation Button */
+Sidebar QPushButton,
+QWidget[objectName="Sidebar"] QPushButton {
+    text-align: left;
+    padding: 12px 16px;
+    padding-left: 48px;
+    font-size: @font-body;
+    font-weight: @font-medium;
+    color: @gray-600;
+    background-color: transparent;
+    border: none;
+    border-left: 4px solid transparent;
+    border-radius: 0;
+}
+
+Sidebar QPushButton:hover,
+QWidget[objectName="Sidebar"] QPushButton:hover {
+    background-color: @gray-100;
+    color: @gray-900;
+}
+
+/* Active Navigation Item */
+Sidebar QPushButton[active="true"],
+Sidebar QPushButton[data-active="true"],
+QWidget[objectName="Sidebar"] QPushButton[active="true"],
+QWidget[objectName="Sidebar"] QPushButton[data-active="true"] {
+    background-color: @primary-light;
+    color: @primary;
+    border-left-color: @primary;
+    font-weight: @font-semibold;
+}
+
+/* Sidebar Section Title */
+Sidebar QLabel[data-role="section-title"],
+QWidget[objectName="Sidebar"] QLabel[data-role="section-title"] {
+    font-size: @font-caption;
+    font-weight: @font-semibold;
+    color: @gray-400;
+    padding: 16px 16px 8px 16px;
+    background: transparent;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Sidebar Divider */
+Sidebar QFrame[objectName="Divider"],
+QWidget[objectName="Sidebar"] QFrame[objectName="Divider"] {
+    background-color: @gray-200;
+    max-height: 1px;
+    margin: 8px 16px;
+}
+
+/* Sidebar Footer */
+QWidget[objectName="SidebarFooter"] {
+    background-color: transparent;
+    border-top: @border-width solid @gray-200;
+}
+
+QWidget[objectName="SidebarFooter"] QLabel {
+    font-size: @font-caption;
+    color: @gray-400;
+    background: transparent;
+}
+
+/* Sidebar Badge (Notification Count) */
+Sidebar QLabel[data-role="badge"],
+QWidget[objectName="Sidebar"] QLabel[data-role="badge"] {
+    background-color: @error;
+    color: @white;
+    font-size: 10px;
+    font-weight: @font-bold;
+    padding: 2px 6px;
+    border-radius: 8px;
+    min-width: 16px;
+}
+
+/* Sidebar App Title */
+Sidebar QLabel[data-role="app-title"],
+QWidget[objectName="Sidebar"] QLabel[data-role="app-title"] {
+    font-size: @font-h3;
+    font-weight: @font-bold;
+    color: @white;
+    background-color: @primary;
+    padding: 20px 0;
+}
+
+/* Theme Toggle Button */
+Sidebar QPushButton[data-role="theme-toggle"],
+QWidget[objectName="Sidebar"] QPushButton[data-role="theme-toggle"] {
+    text-align: center;
+    padding: 8px 16px;
+    padding-left: 16px;
+    font-size: @font-caption;
+    font-weight: @font-medium;
+    color: @gray-500;
+    background-color: @gray-100;
+    border: 1px solid @gray-200;
+    border-left: 1px solid @gray-200;
+    border-radius: @radius-sm;
+    margin: 8px 16px;
+}
+
+Sidebar QPushButton[data-role="theme-toggle"]:hover,
+QWidget[objectName="Sidebar"] QPushButton[data-role="theme-toggle"]:hover {
+    background-color: @gray-200;
+    color: @gray-700;
+    border-left: 1px solid @gray-200;
+}

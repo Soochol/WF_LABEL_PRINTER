@@ -1,155 +1,217 @@
-"""이력 화면 - 하이퍼 미니멀리즘 디자인"""
+"""이력 화면 - 반응형 디자인"""
 from PyQt6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem,
-    QHeaderView, QLabel, QPushButton
+    QHeaderView, QLabel, QPushButton, QScrollArea, QWidget,
+    QFrame, QSizePolicy, QAbstractItemView
 )
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QColor, QBrush
+from PyQt6.QtGui import QColor, QBrush, QFont
 from ..core import ComponentBase, Theme
 from ..components.search_panel import SearchPanel
+from ..styles import get_theme_manager
+from ..styles.theme_manager import ThemeMode
+
 
 class HistoryView(ComponentBase):
     """이력 뷰"""
 
     # Signals
-    search_requested = pyqtSignal(dict)  # 검색 요청
-    refresh_requested = pyqtSignal()     # 새로고침 요청
-    delete_requested = pyqtSignal(int)   # 삭제 요청 (record_id)
+    search_requested = pyqtSignal(dict)
+    refresh_requested = pyqtSignal()
+    delete_requested = pyqtSignal(int)
 
     def __init__(self, theme=None, parent=None):
         super().__init__(parent)
         self.theme = theme or Theme()
-
-        # 배경색
-        self.setStyleSheet(f"""
-            HistoryView {{
-                background-color: {self.theme.colors.GRAY_50};
-            }}
-        """)
+        self.setObjectName("HistoryView")
 
         # 메인 레이아웃
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(32, 32, 32, 32)
-        main_layout.setSpacing(24)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
+
+        # 스크롤 영역
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setFrameShape(QFrame.Shape.NoFrame)
+        scroll_area.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        )
+
+        # 스크롤 컨텐츠
+        scroll_content = QWidget()
+        content_layout = QVBoxLayout(scroll_content)
+        content_layout.setContentsMargins(24, 24, 24, 24)
+        content_layout.setSpacing(16)
 
         # ========== 헤더 ==========
         header_layout = QHBoxLayout()
-        header_layout.setSpacing(16)
+        header_layout.setSpacing(12)
 
         # 타이틀
         title = QLabel("Print History")
-        title.setStyleSheet(f"""
-            font-size: {self.theme.fonts.H1}px;
-            font-weight: {self.theme.fonts.BOLD};
-            color: {self.theme.colors.GRAY_900};
-            background: transparent;
-        """)
+        title.setProperty("data-role", "view-title")
         header_layout.addWidget(title)
         header_layout.addStretch()
 
         # 삭제 버튼
-        delete_btn = QPushButton("삭제")
-        delete_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {self.theme.colors.WHITE};
-                color: {self.theme.colors.ERROR};
-                border: 1px solid {self.theme.colors.GRAY_300};
-                border-radius: 8px;
-                padding: 10px 20px;
-                font-weight: {self.theme.fonts.MEDIUM};
-                font-size: {self.theme.fonts.BODY}px;
-            }}
-            QPushButton:hover {{
-                background-color: #FEE;
-                border-color: {self.theme.colors.ERROR};
-            }}
-        """)
-        delete_btn.setFixedHeight(40)
-        delete_btn.setFixedWidth(100)
-        delete_btn.clicked.connect(self._on_delete)
-        header_layout.addWidget(delete_btn)
+        self.delete_btn = QPushButton("삭제")
+        self.delete_btn.setProperty("data-role", "view-danger")
+        self.delete_btn.setMinimumHeight(36)
+        self.delete_btn.setMinimumWidth(80)
+        self.delete_btn.setMaximumWidth(120)
+        self.delete_btn.clicked.connect(self._on_delete)
+        header_layout.addWidget(self.delete_btn)
 
         # 새로고침 버튼
-        refresh_btn = QPushButton("새로고침")
-        refresh_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {self.theme.colors.WHITE};
-                color: {self.theme.colors.GRAY_700};
-                border: 1px solid {self.theme.colors.GRAY_300};
-                border-radius: 8px;
-                padding: 10px 20px;
-                font-weight: {self.theme.fonts.MEDIUM};
-                font-size: {self.theme.fonts.BODY}px;
-            }}
-            QPushButton:hover {{
-                background-color: {self.theme.colors.GRAY_50};
-                border-color: {self.theme.colors.GRAY_400};
-            }}
-        """)
-        refresh_btn.setFixedHeight(40)
-        refresh_btn.setFixedWidth(100)
-        refresh_btn.clicked.connect(self._on_refresh)
-        header_layout.addWidget(refresh_btn)
+        self.refresh_btn = QPushButton("새로고침")
+        self.refresh_btn.setProperty("data-role", "view-secondary")
+        self.refresh_btn.setMinimumHeight(36)
+        self.refresh_btn.setMinimumWidth(80)
+        self.refresh_btn.setMaximumWidth(120)
+        self.refresh_btn.clicked.connect(self._on_refresh)
+        header_layout.addWidget(self.refresh_btn)
 
-        main_layout.addLayout(header_layout)
+        content_layout.addLayout(header_layout)
 
         # ========== 검색 패널 ==========
         self.search_panel = SearchPanel(self.theme)
         self.search_panel.search_requested.connect(self._on_search)
         self.search_panel.reset_requested.connect(self._on_reset)
-        main_layout.addWidget(self.search_panel)
+        self.search_panel.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
+        )
+        content_layout.addWidget(self.search_panel)
 
         # ========== 테이블 ==========
         self.table = QTableWidget()
+        self.table.setObjectName("HistoryTable")
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels([
             "시리얼 번호", "MAC 주소", "출력 일시", "PRN 템플릿"
         ])
 
-        # 테이블 스타일 (보더리스 미니멀)
+        # 테이블 설정
+        self.table.setSelectionBehavior(
+            QAbstractItemView.SelectionBehavior.SelectRows
+        )
+        self.table.setSelectionMode(
+            QAbstractItemView.SelectionMode.SingleSelection
+        )
+        self.table.setAlternatingRowColors(True)
+        self.table.verticalHeader().setVisible(False)
+        self.table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.table.setShowGrid(True)
+
+        # 열 너비 설정 (반응형)
+        header = self.table.horizontalHeader()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Fixed)
+        header.resizeSection(2, 160)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+
+        # 행 높이
+        self.table.verticalHeader().setDefaultSectionSize(40)
+
+        # 테이블 크기 정책
+        self.table.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
+        )
+        self.table.setMinimumHeight(300)
+
+        content_layout.addWidget(self.table, 1)
+
+        scroll_area.setWidget(scroll_content)
+        main_layout.addWidget(scroll_area)
+
+        # 스타일 적용
+        self._apply_style()
+
+        # 테마 변경 연결
+        theme_mgr = get_theme_manager()
+        theme_mgr.theme_changed.connect(self._on_theme_changed)
+
+    def _on_theme_changed(self, _):
+        self._apply_style()
+
+    def _apply_style(self):
+        theme_mgr = get_theme_manager()
+        colors = theme_mgr.colors
+        is_dark = theme_mgr.mode == ThemeMode.DARK
+
+        if is_dark:
+            bg_color = "#0D1117"
+            alt_bg_color = "#161B22"
+            header_bg = "#21262D"
+            border_color = "#30363D"
+            text_color = "#E6EDF3"
+            hover_color = "#30363D"
+        else:
+            bg_color = "#FFFFFF"
+            alt_bg_color = "#F6F8FA"
+            header_bg = "#F6F8FA"
+            border_color = "#D0D7DE"
+            text_color = "#1F2328"
+            hover_color = "#EAEEF2"
+
         self.table.setStyleSheet(f"""
             QTableWidget {{
-                border: 1px solid {self.theme.colors.GRAY_200};
-                background-color: {self.theme.colors.WHITE};
-                gridline-color: transparent;
-                font-size: {self.theme.fonts.BODY}px;
+                background-color: {bg_color};
+                alternate-background-color: {alt_bg_color};
+                border: 1px solid {border_color};
                 border-radius: 8px;
+                gridline-color: {border_color};
+                color: {text_color};
+                font-size: 13px;
             }}
             QTableWidget::item {{
-                padding: 16px 12px;
-                color: {self.theme.colors.GRAY_900};
-                border: none;
-                border-bottom: 1px solid {self.theme.colors.GRAY_100};
+                padding: 8px 12px;
+                border-bottom: 1px solid {border_color};
+                color: {text_color};
             }}
             QTableWidget::item:hover {{
-                background-color: {self.theme.colors.GRAY_50};
+                background-color: {hover_color};
             }}
             QTableWidget::item:selected {{
-                background-color: {self.theme.colors.PRIMARY_LIGHT};
-                color: {self.theme.colors.PRIMARY_DARK};
+                background-color: {colors.PRIMARY};
+                color: #FFFFFF;
             }}
             QHeaderView::section {{
-                background-color: transparent;
-                color: {self.theme.colors.GRAY_700};
-                font-weight: {self.theme.fonts.SEMIBOLD};
-                font-size: {self.theme.fonts.CAPTION}px;
-                text-transform: uppercase;
-                padding: 12px;
+                background-color: {header_bg};
+                color: {text_color};
+                font-weight: 600;
+                font-size: 13px;
+                padding: 10px 12px;
                 border: none;
-                border-bottom: 1px solid {self.theme.colors.GRAY_200};
+                border-bottom: 2px solid {border_color};
+                border-right: 1px solid {border_color};
+            }}
+            QHeaderView::section:last {{
+                border-right: none;
+            }}
+        """)
+
+        # 스크롤바 스타일
+        self.setStyleSheet(f"""
+            QScrollArea {{
+                background: transparent;
+                border: none;
             }}
             QScrollBar:vertical {{
                 border: none;
                 background: transparent;
                 width: 8px;
+                margin: 0;
             }}
             QScrollBar::handle:vertical {{
-                background: {self.theme.colors.GRAY_300};
+                background: {colors.GRAY_400};
                 border-radius: 4px;
                 min-height: 30px;
             }}
             QScrollBar::handle:vertical:hover {{
-                background: {self.theme.colors.GRAY_400};
+                background: {colors.GRAY_500};
             }}
             QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
                 height: 0px;
@@ -157,26 +219,27 @@ class HistoryView(ComponentBase):
             QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
                 background: transparent;
             }}
+            QScrollBar:horizontal {{
+                border: none;
+                background: transparent;
+                height: 8px;
+                margin: 0;
+            }}
+            QScrollBar::handle:horizontal {{
+                background: {colors.GRAY_400};
+                border-radius: 4px;
+                min-width: 30px;
+            }}
+            QScrollBar::handle:horizontal:hover {{
+                background: {colors.GRAY_500};
+            }}
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
+                width: 0px;
+            }}
+            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{
+                background: transparent;
+            }}
         """)
-
-        # 테이블 설정
-        self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
-        self.table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
-        self.table.setAlternatingRowColors(False)
-        self.table.verticalHeader().setVisible(False)
-        self.table.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-
-        # 열 너비 설정
-        header = self.table.horizontalHeader()
-        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)  # 시리얼 번호
-        header.resizeSection(0, 220)  # 20자 시리얼 번호
-        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)  # MAC 주소
-        header.resizeSection(1, 180)  # 17자 MAC 주소
-        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Fixed)  # 출력 일시
-        header.resizeSection(2, 160)  # 날짜+시간
-        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)  # PRN 템플릿
-
-        main_layout.addWidget(self.table)
 
     def _on_refresh(self):
         """새로고침"""
@@ -202,7 +265,7 @@ class HistoryView(ComponentBase):
 
         row = selected_rows[0].row()
 
-        # 행에서 record_id 가져오기 (첫 번째 컬럼의 UserRole 데이터로 저장됨)
+        # 행에서 record_id 가져오기
         item = self.table.item(row, 0)
         if not item:
             return
@@ -226,17 +289,10 @@ class HistoryView(ComponentBase):
         )
 
         if reply == QMessageBox.StandardButton.Yes:
-            # 삭제 요청 시그널 발생
             self.delete_requested.emit(record_id)
 
-
     def set_history(self, history_list, update_count=True):
-        """이력 데이터 설정
-
-        Args:
-            history_list: 이력 레코드 리스트
-            update_count: 검색 결과 개수 업데이트 여부
-        """
+        """이력 데이터 설정"""
         self.table.setRowCount(0)
 
         # 검색 결과 개수 업데이트
@@ -249,24 +305,34 @@ class HistoryView(ComponentBase):
 
             # 시리얼 번호 (record_id를 UserRole에 저장)
             serial_item = QTableWidgetItem(record.get('serial_number', ''))
-            serial_item.setData(Qt.ItemDataRole.UserRole, record.get('id'))  # ID 저장
+            serial_item.setData(Qt.ItemDataRole.UserRole, record.get('id'))
             self.table.setItem(row_idx, 0, serial_item)
 
             # MAC 주소
-            self.table.setItem(row_idx, 1, QTableWidgetItem(record.get('mac_address', '')))
+            self.table.setItem(
+                row_idx, 1,
+                QTableWidgetItem(record.get('mac_address', ''))
+            )
 
             # 출력 일시
-            self.table.setItem(row_idx, 2, QTableWidgetItem(record.get('print_datetime', '')))
+            self.table.setItem(
+                row_idx, 2,
+                QTableWidgetItem(record.get('print_datetime', ''))
+            )
 
             # PRN 템플릿
-            self.table.setItem(row_idx, 3, QTableWidgetItem(record.get('prn_template', '')))
+            self.table.setItem(
+                row_idx, 3,
+                QTableWidgetItem(record.get('prn_template', ''))
+            )
 
     def add_record(self, record):
         """단일 레코드 추가"""
-        row_idx = self.table.rowCount()
-        self.table.insertRow(0)  # 최상단에 추가
+        self.table.insertRow(0)
 
-        self.table.setItem(0, 0, QTableWidgetItem(record.get('serial_number', '')))
+        serial_item = QTableWidgetItem(record.get('serial_number', ''))
+        serial_item.setData(Qt.ItemDataRole.UserRole, record.get('id'))
+        self.table.setItem(0, 0, serial_item)
         self.table.setItem(0, 1, QTableWidgetItem(record.get('mac_address', '')))
         self.table.setItem(0, 2, QTableWidgetItem(record.get('print_datetime', '')))
         self.table.setItem(0, 3, QTableWidgetItem(record.get('prn_template', '')))

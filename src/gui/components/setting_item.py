@@ -14,6 +14,7 @@ class SettingItemBase(QWidget):
         super().__init__(parent)
         self.setting_key = setting_key
         self.theme = theme or Theme()
+        self.setObjectName("SettingItem")
 
         # 메인 레이아웃
         main_layout = QVBoxLayout(self)
@@ -22,11 +23,7 @@ class SettingItemBase(QWidget):
 
         # 레이블
         label_widget = QLabel(label)
-        label_widget.setStyleSheet(f"""
-            font-size: {self.theme.fonts.BODY}px;
-            font-weight: {self.theme.fonts.SEMIBOLD};
-            color: {self.theme.colors.GRAY_900};
-        """)
+        label_widget.setProperty("data-role", "setting-label")  # QSS 셀렉터용
         main_layout.addWidget(label_widget)
 
         # 입력 필드 컨테이너 (하위 클래스에서 추가)
@@ -38,11 +35,7 @@ class SettingItemBase(QWidget):
         if description:
             desc_label = QLabel(description)
             desc_label.setWordWrap(True)
-            desc_label.setStyleSheet(f"""
-                font-size: {self.theme.fonts.CAPTION}px;
-                color: {self.theme.colors.GRAY_600};
-                line-height: 1.5;
-            """)
+            desc_label.setProperty("data-role", "setting-description")  # QSS 셀렉터용
             main_layout.addWidget(desc_label)
 
         # 도움말 테이블 (선택사항)
@@ -59,16 +52,12 @@ class SettingItemBase(QWidget):
         """
         # 테이블 타이틀
         table_title = QLabel("코드 매핑:")
-        table_title.setStyleSheet(f"""
-            font-size: {self.theme.fonts.CAPTION}px;
-            font-weight: {self.theme.fonts.SEMIBOLD};
-            color: {self.theme.colors.GRAY_700};
-            margin-top: 8px;
-        """)
+        table_title.setProperty("data-role", "help-table-title")  # QSS 셀렉터용
         layout.addWidget(table_title)
 
         # 테이블 위젯
         table = QTableWidget()
+        table.setObjectName("HelpTable")  # QSS 셀렉터용
         table.setColumnCount(len(table_data['headers']))
         table.setRowCount(len(table_data['rows']))
         table.setHorizontalHeaderLabels(table_data['headers'])
@@ -86,33 +75,6 @@ class SettingItemBase(QWidget):
 
         # 테이블 높이 자동 조정
         table.setMaximumHeight(table.verticalHeader().length() + table.horizontalHeader().height() + 4)
-
-        # 스타일링
-        table.setStyleSheet(f"""
-            QTableWidget {{
-                border: 1px solid {self.theme.colors.GRAY_300};
-                border-radius: 4px;
-                background-color: {self.theme.colors.WHITE};
-                gridline-color: {self.theme.colors.GRAY_200};
-                font-size: {self.theme.fonts.CAPTION}px;
-            }}
-            QTableWidget::item {{
-                padding: 4px 8px;
-                color: {self.theme.colors.GRAY_800};
-            }}
-            QHeaderView::section {{
-                background-color: {self.theme.colors.GRAY_100};
-                padding: 6px 8px;
-                border: none;
-                border-bottom: 1px solid {self.theme.colors.GRAY_300};
-                border-right: 1px solid {self.theme.colors.GRAY_300};
-                font-weight: {self.theme.fonts.SEMIBOLD};
-                color: {self.theme.colors.GRAY_700};
-            }}
-            QHeaderView::section:last {{
-                border-right: none;
-            }}
-        """)
 
         layout.addWidget(table)
 
@@ -143,25 +105,11 @@ class SelectSettingItem(SettingItemBase):
             self.set_value(default)
 
         self.combo.setFixedHeight(LayoutSystem.INPUT_HEIGHT)
+        self.combo.setProperty("data-role", "setting-combo")  # QSS 셀렉터용
 
         # 마우스 휠 이벤트 무시
         self.combo.wheelEvent = lambda event: event.ignore()
 
-        self.combo.setStyleSheet(f"""
-            QComboBox {{
-                background-color: {self.theme.colors.WHITE};
-                border: {LayoutSystem.BORDER_WIDTH}px solid {self.theme.colors.GRAY_300};
-                border-radius: {LayoutSystem.BORDER_RADIUS}px;
-                padding: 0 12px;
-                font-size: {self.theme.fonts.BODY}px;
-            }}
-            QComboBox:hover {{
-                border-color: {self.theme.colors.PRIMARY};
-            }}
-            QComboBox::drop-down {{
-                border: none;
-            }}
-        """)
         self.combo.currentIndexChanged.connect(self._on_value_changed)
         self.input_layout.addWidget(self.combo, 1)
 
@@ -209,22 +157,7 @@ class InputSettingItem(SettingItemBase):
         if default:
             self.input.setText(default)
         self.input.setFixedHeight(LayoutSystem.INPUT_HEIGHT)
-        self.input.setStyleSheet(f"""
-            QLineEdit {{
-                background-color: {self.theme.colors.WHITE};
-                border: {LayoutSystem.BORDER_WIDTH}px solid {self.theme.colors.GRAY_300};
-                border-radius: {LayoutSystem.BORDER_RADIUS}px;
-                padding: 0 12px;
-                font-size: {self.theme.fonts.BODY}px;
-            }}
-            QLineEdit:hover {{
-                border-color: {self.theme.colors.PRIMARY};
-            }}
-            QLineEdit:focus {{
-                border-color: {self.theme.colors.PRIMARY};
-                outline: none;
-            }}
-        """)
+        self.input.setProperty("data-role", "setting-input")  # QSS 셀렉터용
         self.input.textChanged.connect(self._on_value_changed)
         self.input_layout.addWidget(self.input, 1)
 
@@ -247,15 +180,7 @@ class CheckboxSettingItem(SettingItemBase):
         # 체크박스
         self.checkbox = QCheckBox()
         self.checkbox.setChecked(default)
-        self.checkbox.setStyleSheet(f"""
-            QCheckBox {{
-                spacing: 8px;
-            }}
-            QCheckBox::indicator {{
-                width: 20px;
-                height: 20px;
-            }}
-        """)
+        self.checkbox.setProperty("data-role", "setting-checkbox")  # QSS 셀렉터용
         self.checkbox.stateChanged.connect(self._on_value_changed)
         self.input_layout.addWidget(self.checkbox)
         self.input_layout.addStretch()
@@ -283,18 +208,7 @@ class SelectWithButtonSettingItem(SelectSettingItem):
         self.button = QPushButton(button_text)
         self.button.setFixedHeight(LayoutSystem.INPUT_HEIGHT)
         self.button.setFixedWidth(120)
-        self.button.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {self.theme.colors.GRAY_100};
-                border: {LayoutSystem.BORDER_WIDTH}px solid {self.theme.colors.GRAY_300};
-                border-radius: {LayoutSystem.BORDER_RADIUS}px;
-                font-size: {self.theme.fonts.BODY}px;
-                color: {self.theme.colors.GRAY_700};
-            }}
-            QPushButton:hover {{
-                background-color: {self.theme.colors.GRAY_200};
-            }}
-        """)
+        self.button.setProperty("data-role", "setting-button")  # QSS 셀렉터용
         self.button.clicked.connect(self.button_clicked.emit)
         self.input_layout.addWidget(self.button, 0)
 
@@ -311,17 +225,6 @@ class InputWithButtonSettingItem(InputSettingItem):
         self.button = QPushButton(button_text)
         self.button.setFixedHeight(LayoutSystem.INPUT_HEIGHT)
         self.button.setFixedWidth(120)
-        self.button.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {self.theme.colors.GRAY_100};
-                border: {LayoutSystem.BORDER_WIDTH}px solid {self.theme.colors.GRAY_300};
-                border-radius: {LayoutSystem.BORDER_RADIUS}px;
-                font-size: {self.theme.fonts.BODY}px;
-                color: {self.theme.colors.GRAY_700};
-            }}
-            QPushButton:hover {{
-                background-color: {self.theme.colors.GRAY_200};
-            }}
-        """)
+        self.button.setProperty("data-role", "setting-button")  # QSS 셀렉터용
         self.button.clicked.connect(self.button_clicked.emit)
         self.input_layout.addWidget(self.button, 0)

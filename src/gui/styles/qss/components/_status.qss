@@ -1,0 +1,135 @@
+/* === Status Indicator Styles === */
+
+/* Status Label - Base */
+QLabel[data-role="status"] {
+    font-size: @font-caption;
+    background: transparent;
+}
+
+/* Status Colors via data-status property */
+QLabel[data-status="connected"] {
+    color: @success;
+}
+
+QLabel[data-status="disconnected"] {
+    color: @error;
+}
+
+QLabel[data-status="checking"],
+QLabel[data-status="pending"] {
+    color: @gray-500;
+}
+
+QLabel[data-status="warning"] {
+    color: @warning;
+}
+
+/* Status Colors via data-color property */
+QLabel[data-color="success"] {
+    color: @success;
+}
+
+QLabel[data-color="error"] {
+    color: @error;
+}
+
+QLabel[data-color="warning"] {
+    color: @warning;
+}
+
+QLabel[data-color="primary"] {
+    color: @primary;
+}
+
+QLabel[data-color="muted"] {
+    color: @gray-500;
+}
+
+/* Status Bar */
+QWidget[objectName="StatusBar"],
+StatusBar {
+    background-color: @gray-100;
+    border-top: @border-width solid @gray-200;
+}
+
+StatusBar QLabel {
+    font-size: @font-caption;
+    color: @gray-600;
+    background: transparent;
+}
+
+/* Status Badge */
+QLabel[data-role="badge"] {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: @font-caption;
+    font-weight: @font-medium;
+}
+
+QLabel[data-role="badge"][data-variant="success"] {
+    background-color: @success-light;
+    color: @success;
+}
+
+QLabel[data-role="badge"][data-variant="error"] {
+    background-color: @error-light;
+    color: @error;
+}
+
+QLabel[data-role="badge"][data-variant="warning"] {
+    background-color: @warning-light;
+    color: @warning;
+}
+
+QLabel[data-role="badge"][data-variant="primary"] {
+    background-color: @primary-light;
+    color: @primary;
+}
+
+/* Connection Status Dot */
+QLabel[data-role="status-dot"] {
+    min-width: 8px;
+    max-width: 8px;
+    min-height: 8px;
+    max-height: 8px;
+    border-radius: 4px;
+}
+
+QLabel[data-role="status-dot"][data-status="connected"] {
+    background-color: @success;
+}
+
+QLabel[data-role="status-dot"][data-status="disconnected"] {
+    background-color: @error;
+}
+
+QLabel[data-role="status-dot"][data-status="checking"] {
+    background-color: @warning;
+}
+
+/* Toast Notifications */
+QLabel[objectName^="Toast"] {
+    padding: 16px 24px;
+    border-radius: @radius;
+    font-weight: @font-medium;
+}
+
+QLabel[objectName="Toast_success"] {
+    background-color: @success;
+    color: @white;
+}
+
+QLabel[objectName="Toast_error"] {
+    background-color: @error;
+    color: @white;
+}
+
+QLabel[objectName="Toast_warning"] {
+    background-color: @warning;
+    color: @white;
+}
+
+QLabel[objectName="Toast_info"] {
+    background-color: @primary;
+    color: @white;
+}

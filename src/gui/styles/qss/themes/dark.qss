@@ -1,0 +1,172 @@
+/* === Dark Theme Overrides === */
+
+/* Note: Most colors are handled by DarkColorTokens.
+   This file contains structural overrides specific to dark mode. */
+
+/* Main background - darker */
+QMainWindow {
+    background-color: @gray-50;
+}
+
+/* Cards have subtle glow in dark mode */
+QFrame[objectName="Card"],
+QWidget[objectName="Card"],
+StatCard {
+    background-color: @gray-100;
+    border-color: @gray-200;
+}
+
+/* Sidebar matches the darker theme */
+QWidget[objectName="Sidebar"],
+Sidebar {
+    background-color: @gray-50;
+    border-right-color: @gray-200;
+}
+
+/* Status bar */
+StatusBar,
+QWidget[objectName="StatusBar"] {
+    background-color: @gray-100;
+    border-top-color: @gray-200;
+}
+
+/* Input fields - darker background */
+QLineEdit,
+QComboBox,
+QSpinBox,
+QTextEdit {
+    background-color: @gray-100;
+    border-color: @gray-300;
+}
+
+QLineEdit:focus,
+QComboBox:focus,
+QSpinBox:focus,
+QTextEdit:focus {
+    border-color: @primary;
+}
+
+/* Tables - darker cells with light text */
+QTableWidget,
+QTableView {
+    background-color: #161B22;
+    alternate-background-color: #1C2128;
+    border-color: #30363D;
+    color: #E6EDF3;
+    gridline-color: #30363D;
+}
+
+QTableWidget::item,
+QTableView::item {
+    color: #E6EDF3;
+    border-bottom: 1px solid #30363D;
+    padding: 8px 12px;
+}
+
+QTableWidget::item:hover,
+QTableView::item:hover {
+    background-color: #21262D;
+}
+
+QTableWidget::item:selected,
+QTableView::item:selected {
+    background-color: #388BFD;
+    color: #FFFFFF;
+}
+
+QHeaderView::section {
+    background-color: #21262D;
+    color: #E6EDF3;
+    border-bottom: 1px solid #30363D;
+    border-right: 1px solid #30363D;
+    padding: 10px 12px;
+    font-weight: 600;
+}
+
+/* Tree widgets */
+QTreeWidget,
+QTreeView {
+    background-color: #161B22;
+    border-color: #30363D;
+    color: #E6EDF3;
+}
+
+QTreeWidget::item,
+QTreeView::item {
+    color: #E6EDF3;
+    padding: 6px 8px;
+}
+
+QTreeWidget::item:hover,
+QTreeView::item:hover {
+    background-color: #21262D;
+}
+
+QTreeWidget::item:selected,
+QTreeView::item:selected {
+    background-color: #388BFD;
+    color: #FFFFFF;
+}
+
+/* List widgets */
+QListWidget,
+QListView {
+    background-color: #161B22;
+    border-color: #30363D;
+    color: #E6EDF3;
+}
+
+QListWidget::item,
+QListView::item {
+    color: #E6EDF3;
+    padding: 8px 12px;
+}
+
+QListWidget::item:hover,
+QListView::item:hover {
+    background-color: #21262D;
+}
+
+QListWidget::item:selected,
+QListView::item:selected {
+    background-color: #388BFD;
+    color: #FFFFFF;
+}
+
+/* Dropdown menus */
+QComboBox QAbstractItemView {
+    background-color: @gray-100;
+    border-color: @gray-200;
+}
+
+QMenu {
+    background-color: @gray-100;
+    border-color: @gray-200;
+}
+
+QMenu::item:selected {
+    background-color: @gray-200;
+}
+
+/* Scrollbars - more visible in dark mode */
+QScrollBar::handle:vertical,
+QScrollBar::handle:horizontal {
+    background: @gray-400;
+}
+
+QScrollBar::handle:vertical:hover,
+QScrollBar::handle:horizontal:hover {
+    background: @gray-500;
+}
+
+/* Toast messages - same colors work in dark mode */
+/* Success/Error/Warning colors are designed to work on both themes */
+
+/* Selection colors */
+QLineEdit,
+QTextEdit,
+QTableWidget,
+QTreeWidget {
+    selection-background-color: @primary-light;
+    selection-color: @gray-900;
+}

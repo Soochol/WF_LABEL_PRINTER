@@ -1,0 +1,141 @@
+/* === Container Styles === */
+
+/* Page Container */
+QWidget[objectName="Page"],
+QScrollArea[objectName="PageScrollArea"] {
+    background-color: @gray-50;
+}
+
+/* Content Container */
+QWidget[objectName="Content"] {
+    background-color: @gray-50;
+}
+
+/* Section Container */
+QFrame[objectName^="Section"],
+QWidget[objectName^="Section"] {
+    background-color: transparent;
+}
+
+/* Section Title */
+QLabel[objectName="SectionTitle"],
+QLabel[data-role="section-title"] {
+    font-size: @font-caption;
+    font-weight: @font-semibold;
+    color: @gray-700;
+    background: transparent;
+    letter-spacing: 0.5px;
+}
+
+/* Card Container */
+Card,
+QFrame[objectName="Card"],
+QWidget[objectName="Card"] {
+    background-color: @white;
+    border: @border-width solid @gray-200;
+    border-radius: @radius-lg;
+}
+
+/* Detail Panel */
+QWidget[objectName="DetailPanel"] {
+    background-color: @white;
+    border-left: @border-width solid @gray-200;
+}
+
+/* Header Container */
+QWidget[objectName="Header"] {
+    background-color: @white;
+    border-bottom: @border-width solid @gray-200;
+}
+
+/* Footer Container */
+QWidget[objectName="Footer"] {
+    background-color: @gray-50;
+    border-top: @border-width solid @gray-200;
+}
+
+/* Toolbar */
+QWidget[objectName="Toolbar"] {
+    background-color: @white;
+    border-bottom: @border-width solid @gray-200;
+    padding: 8px 16px;
+}
+
+/* Action Bar */
+QWidget[objectName="ActionBar"] {
+    background-color: transparent;
+}
+
+/* Splitter */
+QSplitter::handle {
+    background-color: @gray-200;
+}
+
+QSplitter::handle:horizontal {
+    width: 1px;
+}
+
+QSplitter::handle:vertical {
+    height: 1px;
+}
+
+QSplitter::handle:hover {
+    background-color: @primary;
+}
+
+/* Dialog Container */
+QDialog {
+    background-color: @white;
+}
+
+/* Modal Overlay */
+QWidget[objectName="ModalOverlay"] {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Empty State Container */
+QWidget[objectName="EmptyState"] {
+    background-color: transparent;
+}
+
+QWidget[objectName="EmptyState"] QLabel[data-role="title"] {
+    font-size: @font-h3;
+    font-weight: @font-semibold;
+    color: @gray-600;
+}
+
+QWidget[objectName="EmptyState"] QLabel[data-role="description"] {
+    font-size: @font-body;
+    color: @gray-500;
+}
+
+/* Loading Container */
+QWidget[objectName="Loading"] {
+    background-color: transparent;
+}
+
+QWidget[objectName="Loading"] QLabel {
+    color: @gray-500;
+}
+
+/* === Settings/Config Detail Panel === */
+
+/* Detail Panel Scroll Area */
+QScrollArea[objectName="DetailScrollArea"] {
+    border: none;
+    background-color: @gray-50;
+}
+
+QScrollArea[objectName="DetailScrollArea"] QWidget {
+    background-color: @gray-50;
+}
+
+/* Detail Panel Title */
+QLabel[objectName="DetailPanelTitle"],
+QLabel[data-role="panel-title"] {
+    font-size: @font-h3;
+    font-weight: @font-bold;
+    color: @gray-900;
+    background: transparent;
+    margin-bottom: 24px;
+}

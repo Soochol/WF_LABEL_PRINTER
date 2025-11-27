@@ -9,14 +9,7 @@ class StatusBar(QWidget):
     def __init__(self, theme=None, parent=None):
         super().__init__(parent)
         self.theme = theme or Theme()
-
-        # 배경 스타일
-        self.setStyleSheet(f"""
-            StatusBar {{
-                background-color: {self.theme.colors.GRAY_100};
-                border-top: 1px solid {self.theme.colors.GRAY_300};
-            }}
-        """)
+        self.setObjectName("StatusBar")  # QSS 셀렉터용
         self.setFixedHeight(32)
 
         # 레이아웃
@@ -26,29 +19,15 @@ class StatusBar(QWidget):
 
         # 프린터 상태
         self.printer_label = QLabel("프린터: 확인 중...")
-        self.printer_label.setStyleSheet(f"""
-            font-size: {self.theme.fonts.CAPTION}px;
-            color: {self.theme.colors.GRAY_600};
-            background: transparent;
-        """)
         layout.addWidget(self.printer_label)
 
         # 구분선
         separator = QLabel("|")
-        separator.setStyleSheet(f"""
-            font-size: {self.theme.fonts.CAPTION}px;
-            color: {self.theme.colors.GRAY_400};
-            background: transparent;
-        """)
+        separator.setProperty("data-role", "separator")
         layout.addWidget(separator)
 
         # MCU 상태
         self.mcu_label = QLabel("MCU: 확인 중...")
-        self.mcu_label.setStyleSheet(f"""
-            font-size: {self.theme.fonts.CAPTION}px;
-            color: {self.theme.colors.GRAY_600};
-            background: transparent;
-        """)
         layout.addWidget(self.mcu_label)
 
         layout.addStretch()
@@ -77,11 +56,8 @@ class StatusBar(QWidget):
             text = f"프린터: {icon} 확인 중..."
 
         self.printer_label.setText(text)
-        self.printer_label.setStyleSheet(f"""
-            font-size: {self.theme.fonts.CAPTION}px;
-            color: {color};
-            background: transparent;
-        """)
+        # 동적 색상은 인라인 스타일 유지
+        self.printer_label.setStyleSheet(f"color: {color};")
 
     def set_mcu_status(self, status: str, detail: str = ""):
         """
@@ -113,8 +89,5 @@ class StatusBar(QWidget):
             text = f"MCU: {icon} 확인 중..."
 
         self.mcu_label.setText(text)
-        self.mcu_label.setStyleSheet(f"""
-            font-size: {self.theme.fonts.CAPTION}px;
-            color: {color};
-            background: transparent;
-        """)
+        # 동적 색상은 인라인 스타일 유지
+        self.mcu_label.setStyleSheet(f"color: {color};")

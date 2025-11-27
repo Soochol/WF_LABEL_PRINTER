@@ -1,0 +1,132 @@
+/* === Table Styles === */
+
+/* Base Table */
+QTableWidget, QTableView {
+    background-color: @white;
+    border: @border-width solid @gray-200;
+    border-radius: @radius;
+    gridline-color: transparent;
+    selection-background-color: @primary-light;
+    selection-color: @gray-900;
+}
+
+QTableWidget::item, QTableView::item {
+    padding: 8px 12px;
+    border-bottom: @border-width solid @gray-100;
+}
+
+QTableWidget::item:hover, QTableView::item:hover {
+    background-color: @gray-50;
+}
+
+QTableWidget::item:selected, QTableView::item:selected {
+    background-color: @primary-light;
+    color: @gray-900;
+}
+
+/* Table Header */
+QHeaderView::section {
+    background-color: @gray-100;
+    color: @gray-700;
+    font-weight: @font-semibold;
+    padding: 10px 12px;
+    border: none;
+    border-bottom: @border-width solid @gray-300;
+    border-right: @border-width solid @gray-200;
+}
+
+QHeaderView::section:last {
+    border-right: none;
+}
+
+QHeaderView::section:hover {
+    background-color: @gray-200;
+}
+
+/* Corner Button (top-left corner) */
+QTableCornerButton::section {
+    background-color: @gray-100;
+    border: none;
+}
+
+/* Alternating Row Colors */
+QTableWidget[alternatingRowColors="true"]::item:alternate,
+QTableView[alternatingRowColors="true"]::item:alternate {
+    background-color: @gray-50;
+}
+
+/* Status Column Styling */
+QTableWidget::item[data-status="success"],
+QTableView::item[data-status="success"] {
+    color: @success;
+}
+
+QTableWidget::item[data-status="error"],
+QTableView::item[data-status="error"] {
+    color: @error;
+}
+
+/* Compact Table Variant */
+QTableWidget[data-variant="compact"]::item,
+QTableView[data-variant="compact"]::item {
+    padding: 4px 8px;
+}
+
+QTableWidget[data-variant="compact"] QHeaderView::section,
+QTableView[data-variant="compact"] QHeaderView::section {
+    padding: 6px 8px;
+}
+
+/* Borderless Table */
+QTableWidget[data-variant="borderless"],
+QTableView[data-variant="borderless"] {
+    border: none;
+}
+
+/* Tree Widget (similar to table) */
+QTreeWidget, QTreeView {
+    background-color: @white;
+    border: @border-width solid @gray-200;
+    border-radius: @radius;
+    selection-background-color: @primary-light;
+}
+
+QTreeWidget::item, QTreeView::item {
+    padding: 8px;
+    border-radius: @radius-sm;
+}
+
+QTreeWidget::item:hover, QTreeView::item:hover {
+    background-color: @gray-50;
+}
+
+QTreeWidget::item:selected, QTreeView::item:selected {
+    background-color: @primary-light;
+    color: @gray-900;
+}
+
+QTreeWidget::branch, QTreeView::branch {
+    background-color: transparent;
+}
+
+/* List Widget */
+QListWidget, QListView {
+    background-color: @white;
+    border: @border-width solid @gray-200;
+    border-radius: @radius;
+    selection-background-color: @primary-light;
+}
+
+QListWidget::item, QListView::item {
+    padding: 8px 12px;
+    border-radius: @radius-sm;
+}
+
+QListWidget::item:hover, QListView::item:hover {
+    background-color: @gray-50;
+}
+
+QListWidget::item:selected, QListView::item:selected {
+    background-color: @primary-light;
+    color: @gray-900;
+}

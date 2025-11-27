@@ -1,0 +1,290 @@
+/* === Card Component Styles === */
+
+/* Base Card */
+QFrame[objectName="Card"],
+QWidget[objectName="Card"] {
+    background-color: @white;
+    border: @border-width solid @gray-200;
+    border-radius: @radius-lg;
+}
+
+/* Card with Hover Effect */
+QFrame[objectName="Card"]:hover,
+QWidget[objectName="Card"]:hover {
+    border-color: @gray-300;
+}
+
+/* Stat Card */
+QFrame[objectName="StatCard"],
+QWidget[objectName="StatCard"],
+StatCard {
+    background-color: @white;
+    border: @border-width solid @gray-200;
+    border-radius: @radius-lg;
+}
+
+QFrame[objectName="StatCard"]:hover,
+QWidget[objectName="StatCard"]:hover,
+StatCard:hover {
+    border-color: @primary-light;
+}
+
+/* Stat Card Title */
+StatCard QLabel[data-role="title"],
+QWidget[objectName="StatCard"] QLabel[data-role="title"] {
+    font-size: @font-caption;
+    font-weight: @font-medium;
+    color: @gray-500;
+    background: transparent;
+}
+
+/* Stat Card Value */
+StatCard QLabel[data-role="value"],
+QWidget[objectName="StatCard"] QLabel[data-role="value"] {
+    font-size: 48px;
+    font-weight: @font-bold;
+    font-family: @font-mono;
+    color: @gray-900;
+    background: transparent;
+}
+
+/* Stat Card Value Colors */
+StatCard QLabel[data-color="success"],
+QWidget[objectName="StatCard"] QLabel[data-color="success"] {
+    color: @success;
+}
+
+StatCard QLabel[data-color="error"],
+QWidget[objectName="StatCard"] QLabel[data-color="error"] {
+    color: @error;
+}
+
+StatCard QLabel[data-color="primary"],
+QWidget[objectName="StatCard"] QLabel[data-color="primary"] {
+    color: @primary;
+}
+
+StatCard QLabel[data-color="muted"],
+QWidget[objectName="StatCard"] QLabel[data-color="muted"] {
+    color: @gray-500;
+}
+
+/* Section Card */
+QFrame[objectName="Section"],
+QWidget[objectName="Section"] {
+    background-color: @white;
+    border: @border-width solid @gray-200;
+    border-radius: @radius;
+}
+
+/* Section Header */
+QLabel[data-role="section-title"] {
+    font-size: @font-h3;
+    font-weight: @font-semibold;
+    color: @gray-900;
+    background: transparent;
+}
+
+/* Expandable Card */
+QFrame[objectName="ExpandableCard"] {
+    background-color: @white;
+    border: @border-width solid @gray-200;
+    border-radius: @radius;
+}
+
+QFrame[objectName="ExpandableCard"][data-expanded="true"] {
+    border-color: @primary-light;
+}
+
+/* Info Card */
+QFrame[data-variant="info"] {
+    background-color: @primary-light;
+    border-color: @primary;
+}
+
+/* Success Card */
+QFrame[data-variant="success"] {
+    background-color: @success-light;
+    border-color: @success;
+}
+
+/* Error Card */
+QFrame[data-variant="error"] {
+    background-color: @error-light;
+    border-color: @error;
+}
+
+/* Warning Card */
+QFrame[data-variant="warning"] {
+    background-color: @warning-light;
+    border-color: @warning;
+}
+
+/* === Search Panel === */
+
+SearchPanel,
+QWidget[objectName="SearchPanel"] {
+    background-color: @white;
+    border: 1px solid @gray-200;
+    border-radius: @radius;
+}
+
+/* Search Panel Date Label */
+SearchPanel QLabel[data-role="filter-label"],
+QWidget[objectName="SearchPanel"] QLabel[data-role="filter-label"] {
+    font-size: @font-caption;
+    font-weight: @font-semibold;
+    color: @gray-700;
+    background: transparent;
+}
+
+/* Search Panel Separator */
+SearchPanel QLabel[data-role="separator"],
+QWidget[objectName="SearchPanel"] QLabel[data-role="separator"] {
+    color: @gray-500;
+    background: transparent;
+}
+
+/* Search Panel Result Count */
+SearchPanel QLabel[data-role="result-count"],
+QWidget[objectName="SearchPanel"] QLabel[data-role="result-count"] {
+    font-size: @font-caption;
+    color: @gray-600;
+    padding-top: 4px;
+    background: transparent;
+}
+
+/* Search Panel Date Edit */
+SearchPanel QDateEdit,
+QWidget[objectName="SearchPanel"] QDateEdit {
+    background-color: @white;
+    border: 1px solid @gray-300;
+    border-radius: @radius-sm;
+    padding: 6px 4px;
+    padding-right: 28px;
+    font-size: @font-body;
+    color: @gray-900;
+}
+
+SearchPanel QDateEdit:focus,
+QWidget[objectName="SearchPanel"] QDateEdit:focus {
+    border-color: @primary;
+    outline: none;
+}
+
+SearchPanel QDateEdit::drop-down,
+QWidget[objectName="SearchPanel"] QDateEdit::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 28px;
+    border: none;
+    background-color: transparent;
+}
+
+SearchPanel QDateEdit::down-arrow,
+QWidget[objectName="SearchPanel"] QDateEdit::down-arrow {
+    image: none;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid @gray-600;
+    width: 0px;
+    height: 0px;
+    margin-right: 8px;
+}
+
+SearchPanel QDateEdit::down-arrow:hover,
+QWidget[objectName="SearchPanel"] QDateEdit::down-arrow:hover {
+    border-top-color: @gray-900;
+}
+
+/* Search Panel LineEdit */
+SearchPanel QLineEdit,
+QWidget[objectName="SearchPanel"] QLineEdit {
+    background-color: @white;
+    border: 1px solid @gray-300;
+    border-radius: @radius-sm;
+    padding: 6px 12px;
+    font-size: @font-body;
+    color: @gray-900;
+}
+
+SearchPanel QLineEdit:focus,
+QWidget[objectName="SearchPanel"] QLineEdit:focus {
+    border-color: @primary;
+    outline: none;
+}
+
+SearchPanel QLineEdit::placeholder,
+QWidget[objectName="SearchPanel"] QLineEdit::placeholder {
+    color: @gray-400;
+}
+
+/* Search Panel Primary Button */
+SearchPanel QPushButton[data-role="search-primary"],
+QWidget[objectName="SearchPanel"] QPushButton[data-role="search-primary"] {
+    background-color: @primary;
+    color: @white;
+    border: none;
+    border-radius: @radius-sm;
+    padding: 8px 16px;
+    font-weight: @font-semibold;
+    font-size: @font-body;
+}
+
+SearchPanel QPushButton[data-role="search-primary"]:hover,
+QWidget[objectName="SearchPanel"] QPushButton[data-role="search-primary"]:hover {
+    background-color: @primary-dark;
+}
+
+SearchPanel QPushButton[data-role="search-primary"]:pressed,
+QWidget[objectName="SearchPanel"] QPushButton[data-role="search-primary"]:pressed {
+    background-color: @primary-dark;
+}
+
+/* Search Panel Secondary Button */
+SearchPanel QPushButton[data-role="search-secondary"],
+QWidget[objectName="SearchPanel"] QPushButton[data-role="search-secondary"] {
+    background-color: @white;
+    color: @gray-700;
+    border: 1px solid @gray-300;
+    border-radius: @radius-sm;
+    padding: 8px 16px;
+    font-weight: @font-medium;
+    font-size: @font-body;
+}
+
+SearchPanel QPushButton[data-role="search-secondary"]:hover,
+QWidget[objectName="SearchPanel"] QPushButton[data-role="search-secondary"]:hover {
+    background-color: @gray-50;
+    border-color: @gray-400;
+}
+
+/* === Toast Notifications === */
+
+/* Base Toast Label */
+Toast QLabel,
+QWidget[objectName="Toast"] QLabel {
+    color: @white;
+    font-size: @font-body;
+    font-weight: @font-medium;
+    padding: 16px 24px;
+    border-radius: @radius;
+}
+
+/* Success Toast */
+Toast QLabel[data-toast-type="success"],
+QWidget[objectName="Toast"] QLabel[data-toast-type="success"] {
+    background-color: @success;
+}
+
+/* Error Toast */
+Toast QLabel[data-toast-type="error"],
+QWidget[objectName="Toast"] QLabel[data-toast-type="error"] {
+    background-color: @error;
+}
+
+/* Info Toast */
+Toast QLabel[data-toast-type="info"],
+QWidget[objectName="Toast"] QLabel[data-toast-type="info"] {
+    background-color: @primary;
+}

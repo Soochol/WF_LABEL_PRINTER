@@ -1,0 +1,30 @@
+/* === Light Theme Overrides === */
+
+/* Light theme uses the default color tokens,
+   so minimal overrides are needed here.
+   This file exists for consistency and future customization. */
+
+/* Main background */
+QMainWindow {
+    background-color: @gray-50;
+}
+
+/* Cards have subtle shadows in light mode */
+QFrame[objectName="Card"],
+QWidget[objectName="Card"],
+StatCard {
+    /* Light theme: white cards on gray background */
+    background-color: @white;
+}
+
+/* Sidebar is slightly darker than content */
+QWidget[objectName="Sidebar"],
+Sidebar {
+    background-color: @gray-50;
+}
+
+/* Status bar blends with sidebar */
+StatusBar,
+QWidget[objectName="StatusBar"] {
+    background-color: @gray-100;
+}

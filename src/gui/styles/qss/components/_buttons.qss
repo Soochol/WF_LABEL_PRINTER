@@ -1,0 +1,133 @@
+/* === Button Styles === */
+
+/* Base Button */
+QPushButton {
+    border: none;
+    border-radius: @radius-sm;
+    padding: 10px 20px;
+    font-weight: @font-medium;
+    background-color: @gray-100;
+    color: @gray-700;
+}
+
+QPushButton:hover {
+    background-color: @gray-200;
+}
+
+QPushButton:pressed {
+    background-color: @gray-300;
+}
+
+QPushButton:disabled {
+    background-color: @gray-100;
+    color: @gray-400;
+}
+
+/* Primary Button - Property Selector */
+QPushButton[primary="true"],
+QPushButton[data-variant="primary"] {
+    background-color: @primary;
+    color: @white;
+}
+
+QPushButton[primary="true"]:hover,
+QPushButton[data-variant="primary"]:hover {
+    background-color: @primary-dark;
+}
+
+QPushButton[primary="true"]:pressed,
+QPushButton[data-variant="primary"]:pressed {
+    background-color: @primary-dark;
+}
+
+QPushButton[primary="true"]:disabled,
+QPushButton[data-variant="primary"]:disabled {
+    background-color: @gray-300;
+    color: @gray-500;
+}
+
+/* Secondary Button */
+QPushButton[secondary="true"],
+QPushButton[data-variant="secondary"] {
+    background-color: @white;
+    color: @gray-700;
+    border: @border-width solid @gray-300;
+}
+
+QPushButton[secondary="true"]:hover,
+QPushButton[data-variant="secondary"]:hover {
+    background-color: @gray-50;
+    border-color: @gray-400;
+}
+
+/* Success Button */
+QPushButton[data-variant="success"] {
+    background-color: @success;
+    color: @white;
+}
+
+QPushButton[data-variant="success"]:hover {
+    background-color: #059669;
+}
+
+/* Error / Danger Button */
+QPushButton[data-variant="error"],
+QPushButton[data-variant="danger"] {
+    background-color: @error;
+    color: @white;
+}
+
+QPushButton[data-variant="error"]:hover,
+QPushButton[data-variant="danger"]:hover {
+    background-color: #DC2626;
+}
+
+/* Warning Button */
+QPushButton[data-variant="warning"] {
+    background-color: @warning;
+    color: @white;
+}
+
+QPushButton[data-variant="warning"]:hover {
+    background-color: #D97706;
+}
+
+/* Ghost Button (Transparent) */
+QPushButton[data-variant="ghost"] {
+    background-color: transparent;
+    color: @gray-700;
+}
+
+QPushButton[data-variant="ghost"]:hover {
+    background-color: @gray-100;
+}
+
+/* Link Button */
+QPushButton[data-variant="link"] {
+    background-color: transparent;
+    color: @primary;
+    text-decoration: underline;
+    padding: 0;
+}
+
+QPushButton[data-variant="link"]:hover {
+    color: @primary-dark;
+}
+
+/* Icon Button (Square) */
+QPushButton[data-variant="icon"] {
+    padding: 8px;
+    min-width: 36px;
+    min-height: 36px;
+}
+
+/* Size Variants */
+QPushButton[data-size="small"] {
+    padding: 6px 12px;
+    font-size: @font-caption;
+}
+
+QPushButton[data-size="large"] {
+    padding: 14px 28px;
+    font-size: 16px;
+}

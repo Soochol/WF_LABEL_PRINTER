@@ -31,7 +31,7 @@ class FormRow(RowBase):
         label = QLabel(label_text)
         label.setObjectName(f"label_{label_text.replace(' ', '_')}")
         label.setFixedWidth(LayoutSystem.LABEL_WIDTH)  # 140px 고정
-        label.setStyleSheet(f"font-weight:{theme.fonts.MEDIUM}; color:{theme.colors.GRAY_700};")
+        label.setProperty("data-role", "row-label")  # QSS 셀렉터용
         layout.addWidget(label, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
 
         # === 위젯 영역 (확장) ===
@@ -61,7 +61,7 @@ class SelectRow(RowBase):
         label = QLabel(label_text)
         label.setObjectName(f"label_{label_text.replace(' ', '_')}")
         label.setFixedWidth(LayoutSystem.LABEL_WIDTH)  # 140px 고정
-        label.setStyleSheet(f"font-weight:{theme.fonts.MEDIUM}; color:{theme.colors.GRAY_700};")
+        label.setProperty("data-role", "row-label")  # QSS 셀렉터용
         layout.addWidget(label, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
 
         # === ComboBox 영역 (확장) ===
@@ -100,7 +100,7 @@ class InputRow(RowBase):
         label = QLabel(label_text)
         label.setObjectName(f"label_{label_text.replace(' ', '_')}")
         label.setFixedWidth(LayoutSystem.LABEL_WIDTH)  # 140px 고정
-        label.setStyleSheet(f"font-weight:{theme.fonts.MEDIUM}; color:{theme.colors.GRAY_700};")
+        label.setProperty("data-role", "row-label")  # QSS 셀렉터용
         layout.addWidget(label, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
 
         # === Input 영역 (확장) ===
@@ -110,7 +110,7 @@ class InputRow(RowBase):
         if default: self.input.setText(default)
         self.input.setFixedHeight(LayoutSystem.INPUT_HEIGHT)  # 48px 고정
         self.input.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        if monospace: self.input.setStyleSheet(f"font-family:{theme.fonts.FAMILY_MONO};")
+        if monospace: self.input.setProperty("data-mono", "true")  # QSS 셀렉터용
         self.input.textChanged.connect(self.text_changed.emit)
         layout.addWidget(self.input, 1)  # stretch=1로 확장
 
@@ -144,13 +144,10 @@ class DisplayRow(RowBase):
         if icon:
             icon_label = QLabel(icon)
             icon_label.setFixedSize(40, 40)
+            icon_label.setProperty("data-role", "row-icon-badge")  # QSS 셀렉터용
+            # 배경색은 동적이므로 인라인 스타일 유지
             bg_color = badge_color or self.theme.colors.BADGE_BLUE
-            icon_label.setStyleSheet(f"""
-                background-color: {bg_color};
-                border-radius: 8px;
-                font-size: 20px;
-                padding: 8px;
-            """)
+            icon_label.setStyleSheet(f"background-color: {bg_color};")
             icon_label.setAlignment(
                 Qt.AlignmentFlag.AlignCenter
             )
@@ -162,10 +159,7 @@ class DisplayRow(RowBase):
         label = QLabel(label_text)
         label.setObjectName(f"label_{label_text.replace(' ', '_')}")
         label.setFixedWidth(LayoutSystem.LABEL_WIDTH)  # 140px 고정
-        label.setStyleSheet(
-            f"font-weight:{self.theme.fonts.MEDIUM}; "
-            f"color:{self.theme.colors.GRAY_700};"
-        )
+        label.setProperty("data-role", "row-label")  # QSS 셀렉터용
         layout.addWidget(
             label, 0,
             Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
@@ -174,7 +168,7 @@ class DisplayRow(RowBase):
         # === 값 영역 (확장, 읽기전용) ===
         self.value_label = QLabel(value_text)
         self.value_label.setObjectName(f"value_{label_text.replace(' ', '_')}")
-        self._update_style()
+        self.value_label.setProperty("data-role", "row-value")  # QSS 셀렉터용
         self.value_label.setSizePolicy(
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
         )
@@ -183,21 +177,12 @@ class DisplayRow(RowBase):
             Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
         )
 
-    def _update_style(self, color=None):
-        """스타일 업데이트 (색상 커스터마이징 가능)"""
-        color = color or self.theme.colors.PRIMARY
-        self.value_label.setStyleSheet(
-            f"font-size:{self.theme.fonts.H2}px; "
-            f"font-weight:{self.theme.fonts.BOLD}; "
-            f"font-family:{self.theme.fonts.FAMILY_MONO}; "
-            f"color:{color};"
-        )
-
     def set_value(self, t, color=None):
         """값 설정 (선택적으로 색상 지정 가능)"""
         self.value_label.setText(t)
         if color:
-            self._update_style(color)
+            # 동적 색상은 인라인 스타일로 유지
+            self.value_label.setStyleSheet(f"color: {color};")
 
 class ButtonRow(RowBase):
     """버튼 자동 정렬 행

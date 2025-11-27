@@ -22,12 +22,7 @@ class LotConfigDetailPanel(QStackedWidget):
         """스크롤 가능한 패널 생성"""
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setStyleSheet(f"""
-            QScrollArea {{
-                border: none;
-                background-color: {self.theme.colors.GRAY_50};
-            }}
-        """)
+        scroll.setObjectName("DetailScrollArea")  # QSS 셀렉터용
 
         content = QWidget()
         content_layout = QVBoxLayout(content)
@@ -35,12 +30,8 @@ class LotConfigDetailPanel(QStackedWidget):
         content_layout.setSpacing(0)
 
         title_label = QLabel(title)
-        title_label.setStyleSheet(f"""
-            font-size: {self.theme.fonts.H3}px;
-            font-weight: {self.theme.fonts.BOLD};
-            color: {self.theme.colors.GRAY_900};
-            margin-bottom: 24px;
-        """)
+        title_label.setObjectName("DetailPanelTitle")  # QSS 셀렉터용
+        title_label.setProperty("data-role", "panel-title")  # QSS 셀렉터용
         content_layout.addWidget(title_label)
 
         scroll.setWidget(content)

@@ -13,13 +13,7 @@ class PrintView(ComponentBase):
     def __init__(self, theme=None, parent=None):
         super().__init__(parent)
         self.theme = theme or Theme()
-
-        # 배경색
-        self.setStyleSheet(f"""
-            PrintView {{
-                background-color: {self.theme.colors.GRAY_50};
-            }}
-        """)
+        self.setObjectName("PrintView")  # QSS 셀렉터용
 
         # 메인 레이아웃
         main_layout = QVBoxLayout(self)
@@ -28,23 +22,12 @@ class PrintView(ComponentBase):
 
         # ========== 헤더 ==========
         header = QLabel("Label Print")
-        header.setStyleSheet(f"""
-            font-size: {self.theme.fonts.H1}px;
-            font-weight: {self.theme.fonts.BOLD};
-            color: {self.theme.colors.GRAY_900};
-            background: transparent;
-        """)
+        header.setProperty("data-role", "view-title")  # QSS 셀렉터용
         main_layout.addWidget(header)
 
         # ========== 상태 정보 패널 ==========
         status_panel = ComponentBase()
-        status_panel.setStyleSheet(f"""
-            ComponentBase {{
-                background-color: {self.theme.colors.WHITE};
-                border: 1px solid {self.theme.colors.GRAY_200};
-                border-radius: 8px;
-            }}
-        """)
+        status_panel.setObjectName("StatusPanel")  # QSS 셀렉터용
 
         status_layout = QVBoxLayout(status_panel)
         status_layout.setContentsMargins(20, 20, 20, 20)
@@ -88,30 +71,14 @@ class PrintView(ComponentBase):
 
         # ========== 로그 섹션 ==========
         log_title = QLabel("로그")
-        log_title.setStyleSheet(f"""
-            font-size: {self.theme.fonts.H3}px;
-            font-weight: {self.theme.fonts.SEMIBOLD};
-            color: {self.theme.colors.GRAY_900};
-            background: transparent;
-            margin-top: 8px;
-        """)
+        log_title.setProperty("data-role", "view-section-title")  # QSS 셀렉터용
         main_layout.addWidget(log_title)
 
         # 로그 텍스트
         self.log_text = QTextEdit()
+        self.log_text.setObjectName("LogText")  # QSS 셀렉터용
         self.log_text.setReadOnly(True)
         self.log_text.setMinimumHeight(300)
-        self.log_text.setStyleSheet(f"""
-            QTextEdit {{
-                font-family: {self.theme.fonts.FAMILY_MONO};
-                font-size: {self.theme.fonts.MONOSPACE}px;
-                background-color: {self.theme.colors.GRAY_900};
-                color: {self.theme.colors.GRAY_50};
-                border: 1px solid {self.theme.colors.GRAY_700};
-                border-radius: 8px;
-                padding: 16px;
-            }}
-        """)
         main_layout.addWidget(self.log_text, stretch=1)
 
         # ========== 버튼 영역 ==========
@@ -121,21 +88,7 @@ class PrintView(ComponentBase):
 
         # 테스트 인쇄 버튼
         test_btn = QPushButton("테스트 인쇄")
-        test_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {self.theme.colors.WHITE};
-                color: {self.theme.colors.GRAY_700};
-                border: 1px solid {self.theme.colors.GRAY_300};
-                border-radius: 8px;
-                padding: 12px 24px;
-                font-weight: {self.theme.fonts.MEDIUM};
-                font-size: {self.theme.fonts.BODY}px;
-            }}
-            QPushButton:hover {{
-                background-color: {self.theme.colors.GRAY_50};
-                border-color: {self.theme.colors.GRAY_400};
-            }}
-        """)
+        test_btn.setProperty("data-role", "view-secondary")  # QSS 셀렉터용
         test_btn.setFixedHeight(48)
         test_btn.setFixedWidth(140)
         test_btn.clicked.connect(self._on_test)
@@ -143,20 +96,7 @@ class PrintView(ComponentBase):
 
         # 인쇄 시작 버튼
         print_btn = QPushButton("인쇄 시작")
-        print_btn.setStyleSheet(f"""
-            QPushButton {{
-                background-color: {self.theme.colors.PRIMARY};
-                color: {self.theme.colors.WHITE};
-                border: none;
-                border-radius: 8px;
-                padding: 12px 24px;
-                font-weight: {self.theme.fonts.SEMIBOLD};
-                font-size: {self.theme.fonts.BODY}px;
-            }}
-            QPushButton:hover {{
-                background-color: {self.theme.colors.PRIMARY_DARK};
-            }}
-        """)
+        print_btn.setProperty("data-role", "view-primary")  # QSS 셀렉터용
         print_btn.setFixedHeight(48)
         print_btn.setFixedWidth(140)
         print_btn.clicked.connect(self._on_print)
@@ -171,23 +111,12 @@ class PrintView(ComponentBase):
 
         # 라벨
         label = QLabel(label_text)
-        label.setStyleSheet(f"""
-            font-size: {self.theme.fonts.CAPTION}px;
-            font-weight: {self.theme.fonts.MEDIUM};
-            color: {self.theme.colors.GRAY_600};
-            background: transparent;
-        """)
+        label.setProperty("data-role", "status-label")  # QSS 셀렉터용
         row.addWidget(label)
 
         # 값
         value = QLabel(value_text)
-        value.setStyleSheet(f"""
-            font-size: {self.theme.fonts.BODY}px;
-            font-weight: {self.theme.fonts.REGULAR};
-            font-family: {self.theme.fonts.FAMILY_MONO};
-            color: {self.theme.colors.GRAY_900};
-            background: transparent;
-        """)
+        value.setProperty("data-role", "status-value")  # QSS 셀렉터용
         row.addWidget(value)
 
         layout.addLayout(row)

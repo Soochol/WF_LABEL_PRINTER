@@ -1,0 +1,224 @@
+/* === Input Component Styles === */
+
+/* Form Row Container */
+QWidget[objectName="FormRow"] {
+    background-color: transparent;
+}
+
+/* Form Label */
+QLabel[data-role="form-label"] {
+    font-weight: @font-medium;
+    color: @gray-700;
+    background: transparent;
+}
+
+/* Form Value (Display) */
+QLabel[data-role="form-value"] {
+    color: @gray-900;
+    background: transparent;
+}
+
+/* Monospace Input */
+QLineEdit[data-mono="true"] {
+    font-family: @font-mono;
+    font-size: @font-mono-size;
+}
+
+/* Read-only Display Field */
+QLineEdit[data-readonly="true"] {
+    background-color: @gray-50;
+    border-color: @gray-200;
+}
+
+/* Input with Error */
+QLineEdit[data-status="error"] {
+    border-color: @error;
+}
+
+QLineEdit[data-status="error"]:focus {
+    border-color: @error;
+}
+
+/* Input with Success */
+QLineEdit[data-status="success"] {
+    border-color: @success;
+}
+
+/* Input Group (Multiple inputs in row) */
+QWidget[objectName="InputGroup"] QLineEdit {
+    border-radius: 0;
+}
+
+QWidget[objectName="InputGroup"] QLineEdit:first-child {
+    border-top-left-radius: @radius-sm;
+    border-bottom-left-radius: @radius-sm;
+}
+
+QWidget[objectName="InputGroup"] QLineEdit:last-child {
+    border-top-right-radius: @radius-sm;
+    border-bottom-right-radius: @radius-sm;
+}
+
+/* Search Input */
+QLineEdit[objectName="SearchInput"] {
+    padding-left: 36px;
+}
+
+/* Date Input */
+QDateEdit {
+    background-color: @white;
+    border: @border-width solid @gray-300;
+    border-radius: @radius-sm;
+    padding: 8px 12px;
+}
+
+QDateEdit:focus {
+    border-color: @primary;
+}
+
+QDateEdit::drop-down {
+    border: none;
+    width: 24px;
+}
+
+/* Setting Item */
+QWidget[objectName="SettingItem"] {
+    background-color: transparent;
+}
+
+QWidget[objectName="SettingItem"] QLabel {
+    color: @gray-700;
+}
+
+QWidget[objectName="SettingItem"] QComboBox,
+QWidget[objectName="SettingItem"] QLineEdit {
+    min-height: 36px;
+}
+
+/* === Setting Item Components === */
+
+/* Setting Item Label */
+QLabel[data-role="setting-label"] {
+    font-size: @font-body;
+    font-weight: @font-semibold;
+    color: @gray-900;
+    background: transparent;
+}
+
+/* Setting Item Description */
+QLabel[data-role="setting-description"] {
+    font-size: @font-caption;
+    color: @gray-600;
+    line-height: 1.5;
+    background: transparent;
+}
+
+/* Help Table Title */
+QLabel[data-role="help-table-title"] {
+    font-size: @font-caption;
+    font-weight: @font-semibold;
+    color: @gray-700;
+    margin-top: 8px;
+    background: transparent;
+}
+
+/* Help Table */
+QTableWidget[objectName="HelpTable"] {
+    border: 1px solid @gray-300;
+    border-radius: @radius-sm;
+    background-color: @white;
+    gridline-color: @gray-200;
+    font-size: @font-caption;
+}
+
+QTableWidget[objectName="HelpTable"]::item {
+    padding: 4px 8px;
+    color: @gray-800;
+}
+
+QTableWidget[objectName="HelpTable"] QHeaderView::section {
+    background-color: @gray-100;
+    padding: 6px 8px;
+    border: none;
+    border-bottom: 1px solid @gray-300;
+    border-right: 1px solid @gray-300;
+    font-weight: @font-semibold;
+    color: @gray-700;
+}
+
+QTableWidget[objectName="HelpTable"] QHeaderView::section:last {
+    border-right: none;
+}
+
+/* Setting Item ComboBox */
+QComboBox[data-role="setting-combo"] {
+    background-color: @white;
+    border: @border-width solid @gray-300;
+    border-radius: @radius-sm;
+    padding: 0 12px;
+    font-size: @font-body;
+}
+
+QComboBox[data-role="setting-combo"]:hover {
+    border-color: @primary;
+}
+
+QComboBox[data-role="setting-combo"]::drop-down {
+    border: none;
+}
+
+/* Setting Item LineEdit */
+QLineEdit[data-role="setting-input"] {
+    background-color: @white;
+    border: @border-width solid @gray-300;
+    border-radius: @radius-sm;
+    padding: 0 12px;
+    font-size: @font-body;
+}
+
+QLineEdit[data-role="setting-input"]:hover {
+    border-color: @primary;
+}
+
+QLineEdit[data-role="setting-input"]:focus {
+    border-color: @primary;
+    outline: none;
+}
+
+/* Setting Item Secondary Button */
+QPushButton[data-role="setting-button"] {
+    background-color: @gray-100;
+    border: @border-width solid @gray-300;
+    border-radius: @radius-sm;
+    font-size: @font-body;
+    color: @gray-700;
+}
+
+QPushButton[data-role="setting-button"]:hover {
+    background-color: @gray-200;
+}
+
+/* === Row Components === */
+
+/* Row Label */
+QLabel[data-role="row-label"] {
+    font-weight: @font-medium;
+    color: @gray-700;
+    background: transparent;
+}
+
+/* Row Value (DisplayRow) */
+QLabel[data-role="row-value"] {
+    font-size: @font-h2;
+    font-weight: @font-bold;
+    font-family: @font-mono;
+    color: @primary;
+    background: transparent;
+}
+
+/* Row Icon Badge */
+QLabel[data-role="row-icon-badge"] {
+    border-radius: 8px;
+    font-size: 20px;
+    padding: 8px;
+}

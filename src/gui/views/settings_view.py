@@ -1,8 +1,13 @@
 """설정 화면 (VSCode 스타일)"""
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QSplitter
+from PyQt6.QtWidgets import (
+    QWidget, QHBoxLayout, QVBoxLayout, QSplitter,
+    QScrollArea, QFrame, QSizePolicy
+)
 from PyQt6.QtCore import pyqtSignal, Qt, QTimer
 from ..core import ComponentBase, Theme
 from ..components import SettingsTree, SettingsDetailPanel
+from ..styles import get_theme_manager
+
 
 class SettingsView(ComponentBase):
     """설정 뷰 (VSCode 스타일 좌우 분할)"""
@@ -12,6 +17,7 @@ class SettingsView(ComponentBase):
     def __init__(self, theme=None, parent=None):
         super().__init__(parent)
         self.theme = theme or Theme()
+        self.setObjectName("SettingsView")
 
         # 즉시 저장용 타이머 (디바운싱)
         self.save_timer = QTimer()
@@ -24,30 +30,88 @@ class SettingsView(ComponentBase):
         main_layout.setSpacing(0)
 
         # 좌우 분할 스플리터
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        splitter.setHandleWidth(1)
-        splitter.setStyleSheet(f"""
-            QSplitter::handle {{
-                background-color: {self.theme.colors.GRAY_300};
-            }}
-        """)
+        self.splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.splitter.setHandleWidth(1)
+        self.splitter.setChildrenCollapsible(False)
 
-        # 좌측: 트리 네비게이션 (30%)
+        # 좌측: 트리 네비게이션
+        tree_container = QWidget()
+        tree_container.setMinimumWidth(180)
+        tree_container.setMaximumWidth(350)
+        tree_layout = QVBoxLayout(tree_container)
+        tree_layout.setContentsMargins(0, 0, 0, 0)
+
         self.tree = SettingsTree(self.theme)
         self.tree.category_selected.connect(self._on_category_selected)
+        tree_layout.addWidget(self.tree)
 
-        # 우측: 설정 상세 패널 (70%)
+        # 우측: 설정 상세 패널 (스크롤 가능)
+        detail_scroll = QScrollArea()
+        detail_scroll.setWidgetResizable(True)
+        detail_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        detail_scroll.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        detail_scroll.setMinimumWidth(300)
+
         self.detail_panel = SettingsDetailPanel(self.theme)
         self.detail_panel.setting_changed.connect(self._on_setting_changed)
+        self.detail_panel.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
+        detail_scroll.setWidget(self.detail_panel)
 
         # 스플리터에 추가
-        splitter.addWidget(self.tree)
-        splitter.addWidget(self.detail_panel)
+        self.splitter.addWidget(tree_container)
+        self.splitter.addWidget(detail_scroll)
 
-        # 초기 비율 설정 (30:70)
-        splitter.setSizes([300, 700])
+        # 초기 비율 설정 (25:75)
+        self.splitter.setSizes([250, 750])
+        self.splitter.setStretchFactor(0, 0)
+        self.splitter.setStretchFactor(1, 1)
 
-        main_layout.addWidget(splitter)
+        main_layout.addWidget(self.splitter)
+
+        # 스크롤바 스타일
+        self._apply_scroll_style()
+
+        # 테마 변경 연결
+        theme_mgr = get_theme_manager()
+        theme_mgr.theme_changed.connect(self._on_theme_changed)
+
+    def _on_theme_changed(self, _):
+        self._apply_scroll_style()
+
+    def _apply_scroll_style(self):
+        theme_mgr = get_theme_manager()
+        colors = theme_mgr.colors
+
+        self.setStyleSheet(f"""
+            QScrollArea {{
+                background: transparent;
+                border: none;
+            }}
+            QScrollBar:vertical {{
+                border: none;
+                background: transparent;
+                width: 8px;
+                margin: 0;
+            }}
+            QScrollBar::handle:vertical {{
+                background: {colors.GRAY_400};
+                border-radius: 4px;
+                min-height: 30px;
+            }}
+            QScrollBar::handle:vertical:hover {{
+                background: {colors.GRAY_500};
+            }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+                height: 0px;
+            }}
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
+                background: transparent;
+            }}
+        """)
 
     def _on_category_selected(self, category_id, category_name):
         """카테고리 선택 시"""
@@ -72,13 +136,28 @@ class SettingsView(ComponentBase):
         return {
             'printer_selection': self.detail_panel.printer_item.get_value(),
             'prn_template': self.detail_panel.template_item.get_value(),
-            'serial_port': self._extract_com_port(self.detail_panel.serial_port_item.get_value()),
+            'serial_port': self._extract_com_port(
+                self.detail_panel.serial_port_item.get_value()
+            ),
             'serial_baudrate': self.detail_panel.serial_baudrate_item.get_value(),
             'serial_timeout': self.detail_panel.serial_timeout_item.get_value(),
-            'auto_increment': 'true' if self.detail_panel.auto_increment_item.get_value() == '사용' else 'false',
-            'use_mac_in_label': 'true' if self.detail_panel.use_mac_item.get_value() == '사용' else 'false',
-            'auto_print_on_mac_detected': 'true' if self.detail_panel.auto_print_on_mac_item.get_value() == '사용' else 'false',
-            'backup_enabled': 'true' if self.detail_panel.backup_enabled_item.get_value() == '사용' else 'false',
+            'auto_increment': (
+                'true' if self.detail_panel.auto_increment_item.get_value() == '사용'
+                else 'false'
+            ),
+            'use_mac_in_label': (
+                'true' if self.detail_panel.use_mac_item.get_value() == '사용'
+                else 'false'
+            ),
+            'auto_print_on_mac_detected': (
+                'true'
+                if self.detail_panel.auto_print_on_mac_item.get_value() == '사용'
+                else 'false'
+            ),
+            'backup_enabled': (
+                'true' if self.detail_panel.backup_enabled_item.get_value() == '사용'
+                else 'false'
+            ),
             'backup_interval': self.detail_panel.backup_interval_item.get_value()
         }
 
@@ -108,11 +187,15 @@ class SettingsView(ComponentBase):
 
         # 보드레이트
         if 'serial_baudrate' in settings:
-            self.detail_panel.serial_baudrate_item.set_value(settings['serial_baudrate'])
+            self.detail_panel.serial_baudrate_item.set_value(
+                settings['serial_baudrate']
+            )
 
         # 타임아웃
         if 'serial_timeout' in settings:
-            self.detail_panel.serial_timeout_item.set_value(settings['serial_timeout'])
+            self.detail_panel.serial_timeout_item.set_value(
+                settings['serial_timeout']
+            )
 
         # 자동 증가
         if 'auto_increment' in settings:
@@ -126,7 +209,10 @@ class SettingsView(ComponentBase):
 
         # MAC 감지 시 자동 인쇄
         if 'auto_print_on_mac_detected' in settings:
-            value = '사용' if settings['auto_print_on_mac_detected'] == 'true' else '사용 안 함'
+            value = (
+                '사용' if settings['auto_print_on_mac_detected'] == 'true'
+                else '사용 안 함'
+            )
             self.detail_panel.auto_print_on_mac_item.set_value(value)
 
         # 백업
@@ -135,7 +221,9 @@ class SettingsView(ComponentBase):
             self.detail_panel.backup_enabled_item.set_value(value)
 
         if 'backup_interval' in settings:
-            self.detail_panel.backup_interval_item.set_value(settings['backup_interval'])
+            self.detail_panel.backup_interval_item.set_value(
+                settings['backup_interval']
+            )
 
     def _extract_com_port(self, port_value):
         """COM 포트 추출 (COM5 - USB... -> COM5)"""

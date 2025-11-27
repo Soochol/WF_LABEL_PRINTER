@@ -3,10 +3,7 @@
 가운데 상단에서 부드럽게 나타났다가 자동으로 사라지는 알림
 """
 from PyQt6.QtWidgets import QLabel, QGraphicsOpacityEffect
-from PyQt6.QtCore import (
-    Qt, QTimer, QPropertyAnimation, QEasingCurve, pyqtProperty
-)
-from PyQt6.QtGui import QColor
+from PyQt6.QtCore import Qt, QTimer, QPropertyAnimation, QEasingCurve, QPoint
 from ..core import ComponentBase, Theme
 
 
@@ -19,6 +16,7 @@ class Toast(ComponentBase):
     def __init__(self, parent, theme=None):
         super().__init__(parent)
         self.theme = theme or Theme()
+        self.setObjectName("Toast")  # QSS 셀렉터용
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
             Qt.WindowType.Tool |
@@ -86,38 +84,31 @@ class Toast(ComponentBase):
             toast_type: "success", "error", "info"
             duration: 표시 시간 (ms)
         """
-        # 스타일 설정
+        # 아이콘 설정
         if toast_type == "success":
-            bg_color = self.theme.colors.SUCCESS
             icon = "✓"
         elif toast_type == "error":
-            bg_color = self.theme.colors.ERROR
             icon = "✗"
         else:
-            bg_color = self.theme.colors.PRIMARY
             icon = "ℹ"
 
         self.label.setText(f"{icon}  {message}")
-        self.label.setStyleSheet(f"""
-            QLabel {{
-                background-color: {bg_color};
-                color: {self.theme.colors.WHITE};
-                font-size: {self.theme.fonts.BODY}px;
-                font-weight: {self.theme.fonts.MEDIUM};
-                padding: 16px 24px;
-                border-radius: 8px;
-            }}
-        """)
+        # QSS property로 토스트 타입 지정
+        self.label.setProperty("data-toast-type", toast_type)
+        self.label.style().unpolish(self.label)
+        self.label.style().polish(self.label)
 
         # 크기 조정
         self.label.adjustSize()
         self.setFixedSize(self.label.size())
 
-        # 위치 설정 (부모 중앙 상단)
+        # 위치 설정 (부모 중앙 상단, 글로벌 좌표)
         if self.parent():
-            parent_rect = self.parent().rect()
-            x = (parent_rect.width() - self.width()) // 2
-            y = 80  # 상단에서 80px 아래
+            # 부모의 글로벌 좌표 가져오기
+            parent_global_pos = self.parent().mapToGlobal(QPoint(0, 0))
+            parent_width = self.parent().width()
+            x = parent_global_pos.x() + (parent_width - self.width()) // 2
+            y = parent_global_pos.y() + 80  # 상단에서 80px 아래
             self.move(x, y)
 
         # Fade in 애니메이션

@@ -5,6 +5,36 @@ Zebra Label Printer - PyQt6 GUI
 
 import sys
 import io
+import traceback
+
+
+def _setup_exception_hook():
+    """전역 예외 핸들러 설정"""
+    def exception_hook(exc_type, exc_value, exc_tb):
+        error_msg = ''.join(traceback.format_exception(exc_type, exc_value, exc_tb))
+        print(f"[FATAL ERROR]\n{error_msg}", file=sys.__stderr__)
+
+        # 파일에도 저장
+        try:
+            from pathlib import Path
+            import os
+            if getattr(sys, 'frozen', False):
+                log_dir = Path(os.environ.get('LOCALAPPDATA', os.path.expanduser('~'))) / "WF_Label_Printer" / "logs"
+            else:
+                log_dir = Path("logs")
+            log_dir.mkdir(parents=True, exist_ok=True)
+            with open(log_dir / "crash_log.txt", "w", encoding="utf-8") as f:
+                f.write(error_msg)
+        except Exception:
+            pass
+
+        sys.__excepthook__(exc_type, exc_value, exc_tb)
+
+    sys.excepthook = exception_hook
+
+
+_setup_exception_hook()
+
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import Qt, QTimer
 from src.gui import MainWindow
@@ -12,14 +42,12 @@ from src.gui import MainWindow
 
 def main():
     """GUI 애플리케이션 실행"""
-
     # Windows에서 UTF-8 인코딩 강제 설정
     if sys.platform == 'win32':
         try:
             sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
             sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
         except (AttributeError, io.UnsupportedOperation):
-            # 이미 wrapper이거나 buffer가 없는 경우 무시
             pass
 
     # High DPI 지원

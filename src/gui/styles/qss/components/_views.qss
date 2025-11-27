@@ -1,0 +1,186 @@
+/* === View Component Styles === */
+
+/* Base View */
+HistoryView,
+PrintView,
+LotConfigView,
+SettingsView,
+HomeView,
+QWidget[objectName="HistoryView"],
+QWidget[objectName="PrintView"],
+QWidget[objectName="LotConfigView"],
+QWidget[objectName="SettingsView"],
+QWidget[objectName="HomeView"] {
+    background-color: @gray-50;
+}
+
+/* === Page Headers === */
+
+/* View Title (H1) */
+QLabel[data-role="view-title"] {
+    font-size: @font-h1;
+    font-weight: @font-bold;
+    color: @gray-900;
+    background: transparent;
+}
+
+/* Section Title (H3) */
+QLabel[data-role="view-section-title"] {
+    font-size: @font-h3;
+    font-weight: @font-semibold;
+    color: @gray-900;
+    background: transparent;
+    margin-top: 8px;
+}
+
+/* === Buttons in Views === */
+
+/* Primary Action Button */
+QPushButton[data-role="view-primary"] {
+    background-color: @primary;
+    color: @white;
+    border: none;
+    border-radius: @radius;
+    padding: 12px 24px;
+    font-weight: @font-semibold;
+    font-size: @font-body;
+}
+
+QPushButton[data-role="view-primary"]:hover {
+    background-color: @primary-dark;
+}
+
+/* Secondary Action Button */
+QPushButton[data-role="view-secondary"] {
+    background-color: @white;
+    color: @gray-700;
+    border: 1px solid @gray-300;
+    border-radius: @radius;
+    padding: 10px 20px;
+    font-weight: @font-medium;
+    font-size: @font-body;
+}
+
+QPushButton[data-role="view-secondary"]:hover {
+    background-color: @gray-50;
+    border-color: @gray-400;
+}
+
+/* Danger Button */
+QPushButton[data-role="view-danger"] {
+    background-color: @white;
+    color: @error;
+    border: 1px solid @gray-300;
+    border-radius: @radius;
+    padding: 10px 20px;
+    font-weight: @font-medium;
+    font-size: @font-body;
+}
+
+QPushButton[data-role="view-danger"]:hover {
+    background-color: @error-light;
+    border-color: @error;
+}
+
+/* === Status Panel === */
+
+/* Status Panel Container */
+QWidget[objectName="StatusPanel"] {
+    background-color: @white;
+    border: 1px solid @gray-200;
+    border-radius: @radius;
+}
+
+/* Status Row Label */
+QLabel[data-role="status-label"] {
+    font-size: @font-caption;
+    font-weight: @font-medium;
+    color: @gray-600;
+    background: transparent;
+}
+
+/* Status Row Value */
+QLabel[data-role="status-value"] {
+    font-size: @font-body;
+    font-weight: @font-regular;
+    font-family: @font-mono;
+    color: @gray-900;
+    background: transparent;
+}
+
+/* === Log Text Area === */
+
+QTextEdit[objectName="LogText"] {
+    font-family: @font-mono;
+    font-size: @font-mono-size;
+    background-color: @gray-900;
+    color: @gray-50;
+    border: 1px solid @gray-700;
+    border-radius: @radius;
+    padding: 16px;
+}
+
+/* === History Table === */
+
+QTableWidget[objectName="HistoryTable"] {
+    border: 1px solid @gray-200;
+    background-color: @white;
+    gridline-color: transparent;
+    font-size: @font-body;
+    border-radius: @radius;
+}
+
+QTableWidget[objectName="HistoryTable"]::item {
+    padding: 16px 12px;
+    color: @gray-900;
+    border: none;
+    border-bottom: 1px solid @gray-100;
+}
+
+QTableWidget[objectName="HistoryTable"]::item:hover {
+    background-color: @gray-50;
+}
+
+QTableWidget[objectName="HistoryTable"]::item:selected {
+    background-color: @primary-light;
+    color: @primary-dark;
+}
+
+QTableWidget[objectName="HistoryTable"] QHeaderView::section {
+    background-color: transparent;
+    color: @gray-700;
+    font-weight: @font-semibold;
+    font-size: @font-caption;
+    text-transform: uppercase;
+    padding: 12px;
+    border: none;
+    border-bottom: 1px solid @gray-200;
+}
+
+/* === ScrollBar for Views === */
+
+QScrollBar:vertical {
+    border: none;
+    background: transparent;
+    width: 8px;
+}
+
+QScrollBar::handle:vertical {
+    background: @gray-300;
+    border-radius: 4px;
+    min-height: 30px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: @gray-400;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: transparent;
+}

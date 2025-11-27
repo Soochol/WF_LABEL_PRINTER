@@ -36,14 +36,10 @@ class Section(ComponentBase):
         # === 제목 영역 (옵션) ===
         if title:
             title_label = QLabel(title.upper())  # 대문자 변환
-            title_label.setObjectName(f"title_{title.replace(' ', '_')}")
+            title_label.setObjectName("SectionTitle")
+            title_label.setProperty("data-role", "section-title")  # QSS 셀렉터용
             title_label.setFixedHeight(LayoutSystem.LABEL_HEIGHT)  # 24px 고정
-            title_label.setStyleSheet(f"""
-                font-size: {self.theme.fonts.CAPTION}px;
-                font-weight: {self.theme.fonts.SEMIBOLD};
-                color: {self.theme.colors.GRAY_700};
-                letter-spacing: 0.5px;
-            """)
+            # 스타일은 QSS에서 처리 (QLabel[data-role="section-title"])
             title_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
             self.layout.addWidget(title_label, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
 
@@ -85,14 +81,7 @@ class Card(ComponentBase):
         )
         self.layout.setSpacing(LayoutSystem.SPACING_SECTION)  # 32px 간격
 
-        # === 카드 스타일 (흰색 배경, 회색 테두리, 둥근 모서리) ===
-        self.setStyleSheet(f"""
-            Card {{
-                background-color: {self.theme.colors.WHITE};
-                border: {LayoutSystem.BORDER_WIDTH}px solid {self.theme.colors.GRAY_200};
-                border-radius: {LayoutSystem.BORDER_RADIUS + 2}px;
-            }}
-        """)
+        # 카드 스타일은 QSS에서 처리 (Card, QWidget[objectName="Card"])
 
         # === 드롭 섀도우 효과 (현대적 느낌, 강화) ===
         shadow = QGraphicsDropShadowEffect()

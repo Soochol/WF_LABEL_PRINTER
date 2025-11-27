@@ -13,6 +13,7 @@ class LotConfigView(ComponentBase):
     def __init__(self, theme=None, parent=None):
         super().__init__(parent)
         self.theme = theme or Theme()
+        self.setObjectName("LotConfigView")  # QSS 셀렉터용
 
         # 즉시 저장용 타이머 (디바운싱)
         self.save_timer = QTimer()
@@ -24,14 +25,9 @@ class LotConfigView(ComponentBase):
         main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setSpacing(0)
 
-        # 좌우 분할 스플리터
+        # 좌우 분할 스플리터 (스타일은 _containers.qss의 QSplitter 참조)
         splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.setHandleWidth(1)
-        splitter.setStyleSheet(f"""
-            QSplitter::handle {{
-                background-color: {self.theme.colors.GRAY_300};
-            }}
-        """)
 
         # 좌측: 트리 네비게이션 (30%)
         self.tree = LotConfigTree(self.theme)

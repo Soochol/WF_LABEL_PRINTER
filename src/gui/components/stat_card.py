@@ -23,7 +23,7 @@ class StatCard(ComponentBase):
     def __init__(self, label_text, value_text="0", theme=None, parent=None):
         super().__init__(parent)
         self.theme = theme or Theme()
-        self.setObjectName(f"StatCard_{label_text.replace(' ', '_')}")
+        self.setObjectName("StatCard")  # QSS 셀렉터 매칭용 고정 이름
 
         # 고정 크기
         self.setFixedHeight(120)
@@ -38,34 +38,14 @@ class StatCard(ComponentBase):
         # 숫자 (메인)
         self.value_label = QLabel(value_text)
         self.value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.value_label.setStyleSheet(f"""
-            font-size: 48px;
-            font-weight: {self.theme.fonts.BOLD};
-            font-family: {self.theme.fonts.FAMILY_MONO};
-            color: {self.theme.colors.GRAY_900};
-            background: transparent;
-        """)
+        self.value_label.setProperty("data-role", "value")  # QSS 셀렉터용
         layout.addWidget(self.value_label)
 
         # 라벨 (하단)
         label = QLabel(label_text)
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        label.setStyleSheet(f"""
-            font-size: {self.theme.fonts.CAPTION}px;
-            font-weight: {self.theme.fonts.MEDIUM};
-            color: {self.theme.colors.GRAY_600};
-            background: transparent;
-        """)
+        label.setProperty("data-role", "title")  # QSS 셀렉터용
         layout.addWidget(label)
-
-        # 카드 스타일
-        self.setStyleSheet(f"""
-            StatCard {{
-                background-color: {self.theme.colors.WHITE};
-                border: 1px solid {self.theme.colors.GRAY_200};
-                border-radius: 12px;
-            }}
-        """)
 
         # 미세한 그림자
         shadow = QGraphicsDropShadowEffect()
@@ -78,49 +58,33 @@ class StatCard(ComponentBase):
         self._y_offset = 0
 
     def set_value(self, text, color=None):
-        """값 업데이트"""
+        """값 업데이트
+
+        Args:
+            text: 표시할 값
+            color: 색상 키 ("success", "error", "primary", "muted") 또는 None
+        """
         self.value_label.setText(text)
         if color:
-            self.value_label.setStyleSheet(
-                self.value_label.styleSheet().replace(
-                    self.theme.colors.GRAY_900, color
-                )
-            )
+            # QSS property로 색상 지정 (data-color 속성 사용)
+            self.value_label.setProperty("data-color", color)
+            self.value_label.style().unpolish(self.value_label)
+            self.value_label.style().polish(self.value_label)
 
     def enterEvent(self, event):
-        """마우스 진입 시 - 살짝 위로"""
-        # 그림자 강화
+        """마우스 진입 시 - 그림자 강화"""
         shadow = QGraphicsDropShadowEffect()
         shadow.setBlurRadius(20)
         shadow.setColor(QColor(0, 0, 0, 25))
         shadow.setOffset(0, 4)
         self.setGraphicsEffect(shadow)
-
-        # 테두리 색상 변경
-        self.setStyleSheet(f"""
-            StatCard {{
-                background-color: {self.theme.colors.WHITE};
-                border: 1px solid {self.theme.colors.PRIMARY_LIGHT};
-                border-radius: 12px;
-            }}
-        """)
         super().enterEvent(event)
 
     def leaveEvent(self, event):
-        """마우스 벗어날 때 - 원래대로"""
-        # 그림자 원복
+        """마우스 벗어날 때 - 그림자 원복"""
         shadow = QGraphicsDropShadowEffect()
         shadow.setBlurRadius(12)
         shadow.setColor(QColor(0, 0, 0, 15))
         shadow.setOffset(0, 2)
         self.setGraphicsEffect(shadow)
-
-        # 테두리 색상 원복
-        self.setStyleSheet(f"""
-            StatCard {{
-                background-color: {self.theme.colors.WHITE};
-                border: 1px solid {self.theme.colors.GRAY_200};
-                border-radius: 12px;
-            }}
-        """)
         super().leaveEvent(event)

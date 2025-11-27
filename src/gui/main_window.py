@@ -1,565 +1,350 @@
+"""메인 윈도우 모듈
+
+애플리케이션의 메인 윈도우를 정의합니다.
+비즈니스 로직은 services/ 모듈로 분리되어 있습니다.
+"""
+
 import sys
 import os
 from pathlib import Path
 from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout
 from PyQt6.QtCore import QTimer
+
 from .core import Theme
+from .styles import ThemeManager
 from .layouts.main_layout import MainLayout
 from .components import ToastManager, StatusBar
+from .services import PrintService, ConfigurationService, HistoryService
 from ..database.db_manager import DBManager
-from ..utils.serial_number_generator import SerialNumberGenerator
 from ..printer.print_controller import PrintController
 from ..printer.zebra_win_controller import ZebraWinController
 from ..mcu.mcu_monitor import MCUMonitor
 
+
 class MainWindow(QMainWindow):
     """메인 윈도우
 
-    체크리스트 준수:
-    - ✅ 중앙 위젯 설정 (setCentralWidget)
-    - ✅ 초기화 순서 준수
-    - ✅ 윈도우 크기 설정
-    - ✅ 시그널/슬롯 연결
-    - ✅ DB 연결 및 데이터 로드
+    역할:
+    - UI 레이아웃 구성
+    - 시그널/슬롯 연결
+    - 서비스 레이어 호출
+
+    비즈니스 로직은 다음 서비스들이 담당:
+    - PrintService: 인쇄 처리
+    - ConfigurationService: 설정 관리
+    - HistoryService: 이력 관리
     """
 
     def __init__(self, debug_mode=False):
-        # ========== 1. 부모 클래스 초기화 ==========
         super().__init__()
 
-        # ========== 2. 윈도우 속성 설정 ==========
+        # 윈도우 설정
+        self._setup_window()
+
+        # 테마 초기화
+        self._setup_theme()
+
+        # 데이터베이스 및 서비스 초기화
+        self._setup_database()
+        self._setup_services()
+
+        # 장치 초기화
+        self._setup_devices()
+
+        # UI 구성
+        self._setup_ui()
+
+        # 시그널 연결
+        self._connect_signals()
+
+        # 초기 데이터 로드
+        self._schedule_initial_load()
+
+        # 디버그 모드
+        if debug_mode or Theme.DEBUG:
+            self._enable_debug_mode()
+
+    # ==================== 초기화 메서드 ====================
+
+    def _setup_window(self):
+        """윈도우 속성 설정"""
         self.setWindowTitle("Zebra Label Printer")
-        self.setMinimumSize(800, 600)  # 최소 크기 설정
-        self.showMaximized()  # 최대 화면으로 실행
+        self.setMinimumSize(800, 600)
+        self.showMaximized()
 
-        # ========== 3. 테마 ==========
-        self.theme = Theme()
-        # 메인 윈도우 배경색 설정 (GRAY_50)
-        self.setStyleSheet(f"""
-            QMainWindow {{
-                background-color: {self.theme.colors.GRAY_50};
-            }}
-            {self.theme.get_global_stylesheet()}
-        """)
+    def _setup_theme(self):
+        """테마 초기화"""
+        self.theme_manager = ThemeManager()
+        self.theme = Theme()  # 하위 호환성
+        self.theme_manager.apply_to_app()
 
-        # ========== 4. 데이터베이스 초기화 ==========
-        # 데이터베이스 경로 설정
+        # 개발 모드에서 Hot Reload 활성화
+        if not getattr(sys, 'frozen', False):
+            self.theme_manager.enable_hot_reload(True)
+
+    def _setup_database(self):
+        """데이터베이스 초기화"""
         if getattr(sys, 'frozen', False):
-            # PyInstaller로 패키징된 경우 - AppData 사용 (관리자 권한 불필요)
-            self.app_base_dir = Path(os.environ.get('LOCALAPPDATA', os.path.expanduser('~'))) / "WF_Label_Printer"
-            db_path = self.app_base_dir / "data" / "label_printer.db"
+            base = os.environ.get('LOCALAPPDATA', os.path.expanduser('~'))
+            self.app_base_dir = Path(base) / "WF_Label_Printer"
         else:
-            # 개발 환경 - 프로젝트 루트의 data 폴더 사용
             self.app_base_dir = Path(__file__).parent.parent.parent
-            db_path = self.app_base_dir / "data" / "label_printer.db"
 
+        db_path = self.app_base_dir / "data" / "label_printer.db"
         self.db = DBManager(str(db_path))
         self.db.initialize()
 
-        # ========== 4-1. 인쇄 컨트롤러 초기화 ==========
+    def _setup_services(self):
+        """서비스 레이어 초기화"""
         self.print_controller = PrintController()
-        self.mcu_monitor = None  # MCU 백그라운드 모니터
-        self.latest_mac_address = None  # 감지된 최신 MAC 주소
+        self.print_service = PrintService(self.db, self.print_controller)
+        self.config_service = ConfigurationService(self.db)
+        self.history_service = HistoryService(self.db)
 
-        # ========== 4-2. 백업 타이머 초기화 ==========
+    def _setup_devices(self):
+        """장치 관련 초기화"""
+        self.mcu_monitor = None
+        self.latest_mac_address = None
+
+        # 백업 타이머
         self.backup_timer = QTimer(self)
         self.backup_timer.timeout.connect(self._do_backup)
 
-        # ========== 5. 중앙 위젯 (메인 레이아웃 + 상태바) ==========
-        # 컨테이너 위젯 생성
+    def _setup_ui(self):
+        """UI 구성"""
         container = QWidget()
-        container_layout = QVBoxLayout(container)
-        container_layout.setContentsMargins(0, 0, 0, 0)
-        container_layout.setSpacing(0)
+        layout = QVBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
-        # 메인 레이아웃 추가
+        # 메인 레이아웃 (사이드바 + 뷰 스택)
         self.main_layout = MainLayout(self.theme)
-        container_layout.addWidget(self.main_layout)
+        layout.addWidget(self.main_layout)
 
-        # 상태바 추가
+        # 상태바
         self.status_bar = StatusBar(self.theme)
-        container_layout.addWidget(self.status_bar)
+        layout.addWidget(self.status_bar)
 
-        # 컨테이너를 중앙 위젯으로 설정
         self.setCentralWidget(container)
 
-        # ========== 5-1. 토스트 관리자 ==========
+        # 토스트 관리자
         self.toast = ToastManager(self, self.theme)
 
-        # ========== 6. 시그널 연결 ==========
-        self._connect_signals()
+    def _connect_signals(self):
+        """시그널 연결"""
+        # Home View
+        home = self.main_layout.get_view("home")
+        if home:
+            home.reset_clicked.connect(self._load_home_data)
+            home.print_requested.connect(self._on_print)
+            home.test_requested.connect(self._on_test_print)
 
-        # ========== 7. 초기 데이터 로드 ==========
-        QTimer.singleShot(100, self.load_home_data)
-        QTimer.singleShot(150, self.load_lot_config)
-        QTimer.singleShot(200, self.load_settings)
+        # Config View
+        config = self.main_layout.get_view("config")
+        if config:
+            config.config_saved.connect(self._on_config_saved)
+
+        # Settings View
+        settings = self.main_layout.get_view("settings")
+        if settings:
+            settings.settings_saved.connect(self._on_settings_saved)
+
+        # History View
+        history = self.main_layout.get_view("history")
+        if history:
+            history.search_requested.connect(self._on_history_search)
+            history.refresh_requested.connect(self._on_history_refresh)
+            history.delete_requested.connect(self._on_history_delete)
+
+        # Sidebar - 테마 토글
+        self.main_layout.sidebar.theme_toggle_requested.connect(
+            self._on_theme_toggle
+        )
+
+        # ThemeManager - 테마 변경 시그널
+        self.theme_manager.theme_changed.connect(self._on_theme_changed)
+
+    def _schedule_initial_load(self):
+        """초기 데이터 로드 스케줄링"""
+        QTimer.singleShot(100, self._load_home_data)
+        QTimer.singleShot(150, self._load_lot_config)
+        QTimer.singleShot(200, self._load_settings)
         QTimer.singleShot(250, self._on_history_refresh)
         QTimer.singleShot(350, self._check_printer_status)
         QTimer.singleShot(450, self._start_mcu_monitor)
         QTimer.singleShot(550, self._start_backup_timer)
 
-        # ========== 8. 디버그 모드 (개발용) ==========
-        if debug_mode or Theme.DEBUG:
-            self._enable_debug_mode()
+    # ==================== 홈 화면 ====================
 
-    def _connect_signals(self):
-        """시그널 연결"""
-        # Home View
-        home_view = self.main_layout.get_view("home")
-        if home_view:
-            home_view.reset_clicked.connect(self.load_home_data)
-            home_view.print_requested.connect(self._on_print_requested)
-            home_view.test_requested.connect(self._on_test_requested)
-
-        # Config View
-        config_view = self.main_layout.get_view("config")
-        if config_view:
-            config_view.config_saved.connect(self._on_config_saved)
-
-        # Settings View
-        settings_view = self.main_layout.get_view("settings")
-        if settings_view:
-            settings_view.settings_saved.connect(self._on_settings_saved)
-
-        # History View
-        history_view = self.main_layout.get_view("history")
-        if history_view:
-            history_view.search_requested.connect(self._on_history_search)
-            history_view.refresh_requested.connect(self._on_history_refresh)
-            history_view.delete_requested.connect(self._on_history_delete)
-
-    def load_home_data(self):
+    def _load_home_data(self):
         """홈 화면 데이터 로드"""
         try:
-            from datetime import datetime
+            data = self.config_service.load_home_data(self.latest_mac_address)
 
-            # 오늘 통계 조회
-            stats = self.db.get_today_stats()
-
-            # LOT 정보 조회
-            lot_config = self.db.get_lot_config()
-
-            # 현재 LOT 번호 생성 (생산순서 제외)
-            current_lot = self._get_lot_number(lot_config)
-
-            # Auto Increment 설정 확인
-            auto_increment = self.db.get_config('auto_increment') != 'false'  # 기본값 true
-
-            # DB에서 해당 LOT의 최대 생산순서 조회
-            max_seq = self.db.get_max_sequence_for_lot(current_lot)
-
-            # 다음 생산순서 결정 (인쇄 로직과 동일)
-            if max_seq is None:
-                # 해당 LOT의 첫 인쇄 → 0001
-                next_sequence = '0001'
-            else:
-                # 기존 LOT 있음
-                if auto_increment:
-                    # Auto Increment 사용: 최대값 +1
-                    next_sequence = str(max_seq + 1).zfill(4)
-                else:
-                    # Auto Increment 사용 안 함: 동일한 번호 유지
-                    next_sequence = str(max_seq).zfill(4)
-
-            # 생산순서를 업데이트하여 다음 시리얼 생성
-            lot_config['production_sequence'] = next_sequence
-
-            # 시리얼 번호 생성기로 다음 시리얼 생성
-            sn_params = {k: v for k, v in lot_config.items() if k in [
-                'model_code', 'dev_code', 'robot_spec', 'suite_spec',
-                'hw_code', 'assembly_code', 'reserved', 'production_date', 'production_sequence'
-            ]}
-            sn_gen = SerialNumberGenerator(**sn_params)
-            next_serial = sn_gen.generate()
-            lot_code = sn_gen.get_lot_code()
-            model = lot_config.get('model_code', '-')
-
-            # 오늘 출력 리스트 조회
-            today = datetime.now().strftime('%Y-%m-%d')
-            history = self.db.get_print_history(
-                limit=1000,  # 충분히 큰 값
-                date_from=today,
-                date_to=today
-            )
-
-            # 마지막 출력 시리얼 번호 (가장 최근 것)
-            last_serial = history[0]['serial_number'] if history else '-'
-
-            # HomeView 업데이트
-            home_view = self.main_layout.get_view("home")
-            if home_view:
-                home_view.set_stats(stats['total'], stats['success'], stats['failed'])
-                home_view.set_serial_info(last_serial, next_serial)
-                home_view.set_mac_address(self.latest_mac_address)
-                home_view.set_history(history)
+            home = self.main_layout.get_view("home")
+            if home:
+                stats = data['stats']
+                home.set_stats(stats['total'], stats['success'], stats['failed'])
+                home.set_serial_info(data['last_serial'], data['next_serial'])
+                home.set_mac_address(data['mac_address'])
+                home.set_history(data['history'])
 
         except Exception as e:
             print(f"홈 데이터 로드 오류: {e}")
 
-    def _on_print_requested(self):
-        """인쇄 요청 (실제 인쇄)"""
-        self._do_print(test_mode=False)
+    # ==================== 인쇄 처리 ====================
 
-    def _on_test_requested(self):
+    def _on_print(self):
+        """실제 인쇄 요청"""
+        self._execute_print(test_mode=False)
+
+    def _on_test_print(self):
         """테스트 인쇄 요청"""
-        self._do_print(test_mode=True)
+        self._execute_print(test_mode=True)
 
-    def _get_lot_number(self, lot_config):
-        """LOT 번호 생성 (날짜 제외한 모든 필드 조합)
-
-        LOT 번호 = model + dev + robot_spec + suite_spec + hw + assembly + reserved + production_date
-        예: P10DL0S0H3A0C10
-        """
-        return (
-            lot_config.get('model_code', '') +
-            lot_config.get('dev_code', '') +
-            lot_config.get('robot_spec', '') +
-            lot_config.get('suite_spec', '') +
-            lot_config.get('hw_code', '') +
-            lot_config.get('assembly_code', '') +
-            lot_config.get('reserved', '') +
-            lot_config.get('production_date', '')
-        )
-
-    def _do_print(self, test_mode: bool = False):
-        """실제 인쇄 처리
+    def _execute_print(self, test_mode: bool = False):
+        """인쇄 실행
 
         Args:
-            test_mode: True면 테스트 모드 (DB 저장 안 함)
+            test_mode: 테스트 모드 여부
         """
-        home_view = self.main_layout.get_view("home")
+        home = self.main_layout.get_view("home")
+        mode_text = "테스트 인쇄" if test_mode else "인쇄"
 
-        def log(msg):
-            """로그 출력 (콘솔만)"""
-            print(msg)
-
-        print(f"\n[DEBUG MainWindow] _do_print 시작 (test_mode={test_mode})")
-        print(f"[DEBUG MainWindow] home_view = {home_view}")
-        print(f"[DEBUG MainWindow] home_view type = {type(home_view)}")
-
-        # 인쇄 시작 - 버튼 비활성화
-        if home_view:
-            print(f"[DEBUG MainWindow] 버튼 비활성화 호출 중...")
-            home_view.set_print_buttons_enabled(False)
-            print(f"[DEBUG MainWindow] 버튼 비활성화 호출 완료")
-        else:
-            print(f"[DEBUG MainWindow] ⚠️ home_view가 None입니다!")
+        # 버튼 비활성화
+        if home:
+            home.set_print_buttons_enabled(False)
 
         try:
-            # 0. 프린터 상태 체크
+            # 프린터 상태 체크
             self._check_printer_status()
 
-            # 1. LOT 설정 가져오기
-            log("LOT 설정 로드 중...")
-            lot_config = self.db.get_lot_config()
+            # LOT 설정 로드
+            lot_config = self.config_service.load_lot_config()
 
-            # 1-1. LOT 변경 체크 및 생산순서 결정 (실제 인쇄만, 아직 DB에 저장 안 함)
+            # 생산순서 계산 (실제 인쇄만)
             if not test_mode:
-                current_lot = self._get_lot_number(lot_config)
-                log(f"현재 LOT: {current_lot}")
+                sequence = self.print_service.calculate_next_sequence(lot_config)
+                lot_config['production_sequence'] = sequence
 
-                # Auto Increment 설정 확인
-                auto_increment = self.db.get_config('auto_increment') != 'false'  # 기본값 true
-
-                # DB에서 현재 LOT의 최대 생산순서 조회
-                max_seq = self.db.get_max_sequence_for_lot(current_lot)
-
-                if max_seq is None:
-                    # 해당 LOT의 첫 인쇄 → 0001
-                    log("✓ 이 LOT의 첫 인쇄: 생산순서 0001")
-                    lot_config['production_sequence'] = '0001'
-                else:
-                    # 해당 LOT 이미 있음
-                    if auto_increment:
-                        # Auto Increment 사용: 최대값 +1
-                        next_seq = str(max_seq + 1).zfill(4)
-                        log(f"✓ 동일 LOT 발견 (Auto Increment ON): 생산순서 {str(max_seq).zfill(4)} → {next_seq}")
-                        lot_config['production_sequence'] = next_seq
-                    else:
-                        # Auto Increment 사용 안 함: 동일한 번호 유지
-                        same_seq = str(max_seq).zfill(4)
-                        log(f"✓ 동일 LOT 발견 (Auto Increment OFF): 생산순서 {same_seq} 유지")
-                        lot_config['production_sequence'] = same_seq
-
-                # 주의: 생산순서는 인쇄 성공 후에만 DB에 저장됨
-
-            # 2. 앱 설정 가져오기
-            log("앱 설정 로드 중...")
-            printer_selection = self.db.get_config('printer_selection') or '자동 검색 (권장)'
-            prn_template = self.db.get_config('prn_template')
-            use_mac_in_label = self.db.get_config('use_mac_in_label') != 'false'  # 기본값 true
-
-            if not prn_template:
-                raise ValueError("PRN 템플릿이 설정되지 않았습니다. 설정 화면에서 템플릿을 선택하세요.")
-
-            # 3. MAC 주소 확인 (라벨에 MAC 사용하는 경우만)
-            if use_mac_in_label:
-                # 테스트 인쇄는 MAC 없이도 진행 가능
-                if not test_mode and not self.latest_mac_address:
-                    raise ValueError("MAC 주소가 감지되지 않았습니다. ESP32 전원을 확인하거나 '라벨 설정'에서 MAC 사용을 비활성화하세요.")
-
-                mac_address = self.latest_mac_address if self.latest_mac_address else "TEST-MAC"
-                if test_mode and not self.latest_mac_address:
-                    log(f"✓ MAC 주소 (테스트 모드): {mac_address}")
-                else:
-                    log(f"✓ MAC 주소: {mac_address}")
-            else:
-                # MAC 사용 안 함 - 더미 값 사용
-                mac_address = "NONE"
-                log("✓ MAC 주소 사용 안 함 (설정에서 비활성화됨)")
-
-            # 4. 인쇄 실행
-            mode_text = "테스트 인쇄" if test_mode else "인쇄"
-            log(f"{mode_text} 시작...")
-
-            result = self.print_controller.print_label(
+            # 인쇄 실행
+            result = self.print_service.execute_print(
                 lot_config=lot_config,
-                mac_address=mac_address,
-                template_name=prn_template,
-                printer_selection=printer_selection,
-                test_mode=test_mode,
-                use_mac_in_label=use_mac_in_label
+                mac_address=self.latest_mac_address,
+                test_mode=test_mode
             )
 
-            # 5. 결과 처리
+            # 결과 처리
             if result['success']:
-                log(f"✓ {result['message']}")
-                log(f"  시리얼 번호: {result['serial_number']}")
-                log(f"  MAC 주소: {result['mac_address']}")
-
-                # 6. DB 저장 (실제 인쇄만)
+                # DB 저장 (실제 인쇄만)
                 if not test_mode:
-                    log("DB에 저장 중...")
-
-                    # 인쇄 날짜
-                    from datetime import datetime
-                    print_date = datetime.now().strftime('%Y-%m-%d')
-
-                    # PRN 템플릿
-                    prn_template = prn_template
-
-                    self.db.save_print_history(
-                        serial_number=result['serial_number'],
-                        mac_address=result['mac_address'],
-                        print_date=print_date,
-                        status='success',
-                        error_message=None,
-                        prn_template=prn_template
+                    prn_template = self.config_service.get_config('prn_template')
+                    self.print_service.save_print_result(
+                        result, lot_config, prn_template
                     )
-                    log("✓ DB 저장 완료")
-
-                    # 6-1. 생산순서를 DB에 저장 (인쇄 성공 후에만!)
-                    self.db.update_lot_config(production_sequence=lot_config['production_sequence'])
-                    log(f"✓ 생산순서 업데이트: {lot_config['production_sequence']}")
-
-                    # 6-2. MAC 주소 초기화 (인쇄 성공 후 다음 인쇄를 위해)
+                    # MAC 주소 초기화
                     self.latest_mac_address = None
-                    log("✓ MAC 주소 초기화 완료 (다음 인쇄 대기)")
+                    # 홈 화면 새로고침
+                    self._load_home_data()
 
-                    # 7. 홈 화면 새로고침
-                    self.load_home_data()
-
-                log(f"\n✓✓✓ {mode_text} 완료! ✓✓✓\n")
-
-                # 성공 토스트 표시
                 self.toast.show_success(
                     f"{mode_text} 완료! {result['serial_number']}"
                 )
             else:
-                log(f"✗ {result['message']}")
-                # 실패 토스트 표시
                 self.toast.show_error(result['message'])
 
         except Exception as e:
-            mode_text = "테스트 인쇄" if test_mode else "인쇄"
-            error_msg = f"{mode_text} 실패: {str(e)}"
-            log(f"✗ {error_msg}")
-
-            # 사용자에게 에러 토스트 표시
-            self.toast.show_error(error_msg, duration=5000)
+            self.toast.show_error(f"{mode_text} 실패: {str(e)}", duration=5000)
 
         finally:
-            # 인쇄 완료/실패 - 버튼 다시 활성화
-            print(f"\n[DEBUG MainWindow] finally 블록 - 버튼 활성화 시작")
-            if home_view:
-                home_view.set_print_buttons_enabled(True)
-                print(f"[DEBUG MainWindow] 버튼 활성화 완료")
-            else:
-                print(f"[DEBUG MainWindow] ⚠️ finally: home_view가 None입니다!")
+            # 버튼 다시 활성화
+            if home:
+                home.set_print_buttons_enabled(True)
 
-    def _on_config_saved(self, config):
-        """LOT 설정 저장"""
-        print("LOT 설정 저장:", config)
-        try:
-            self.db.update_lot_config(**config)
-            # 홈 화면 새로고침
-            self.load_home_data()
-        except Exception as e:
-            print(f"LOT 설정 저장 오류: {e}")
+    # ==================== 설정 관리 ====================
 
-    def _on_settings_saved(self, settings):
-        """앱 설정 저장"""
-        print("앱 설정 저장:", settings)
-        try:
-            # 각 설정값을 DB에 저장
-            for key, value in settings.items():
-                self.db.set_config(key, value)
-            print("✓ 설정이 저장되었습니다")
-        except Exception as e:
-            print(f"설정 저장 오류: {e}")
-
-    def load_lot_config(self):
-        """LOT 설정 화면 데이터 로드"""
+    def _load_lot_config(self):
+        """LOT 설정 로드"""
         try:
             config_view = self.main_layout.get_view("config")
-            if not config_view:
-                return
-
-            # DB에서 LOT 설정 로드
-            lot_config = self.db.get_lot_config()
-
-            # LOT 설정 뷰에 적용
-            if lot_config:
-                config_view.set_config(lot_config)
-                print(f"✓ LOT 설정 로드 완료")
-
+            if config_view:
+                lot_config = self.config_service.load_lot_config()
+                if lot_config:
+                    config_view.set_config(lot_config)
         except Exception as e:
             print(f"LOT 설정 로드 오류: {e}")
 
-    def load_settings(self):
-        """설정 화면 데이터 로드"""
+    def _on_config_saved(self, config: dict):
+        """LOT 설정 저장"""
+        try:
+            self.config_service.save_lot_config(config)
+            self._load_home_data()
+            self.toast.show_success("LOT 설정이 저장되었습니다.")
+        except Exception as e:
+            self.toast.show_error(f"LOT 설정 저장 실패: {str(e)}")
+
+    def _load_settings(self):
+        """앱 설정 로드"""
         try:
             settings_view = self.main_layout.get_view("settings")
-            if not settings_view:
-                return
-
-            # DB에서 설정값 로드
-            settings = {}
-            setting_keys = [
-                'printer_selection', 'prn_template', 'serial_port',
-                'serial_baudrate', 'serial_timeout', 'auto_increment',
-                'use_mac_in_label', 'auto_print_on_mac_detected',
-                'backup_enabled', 'backup_interval', 'backup_path'
-            ]
-
-            for key in setting_keys:
-                value = self.db.get_config(key)
-                if value is not None:
-                    settings[key] = value
-
-            # 설정값이 있으면 적용
-            if settings:
-                settings_view.set_settings(settings)
-
+            if settings_view:
+                settings = self.config_service.load_settings()
+                if settings:
+                    settings_view.set_settings(settings)
         except Exception as e:
             print(f"설정 로드 오류: {e}")
 
-    def _on_history_search(self, filters):
-        """이력 검색 요청
+    def _on_settings_saved(self, settings: dict):
+        """앱 설정 저장"""
+        try:
+            self.config_service.save_settings(settings)
+            self.toast.show_success("설정이 저장되었습니다.")
+        except Exception as e:
+            self.toast.show_error(f"설정 저장 실패: {str(e)}")
 
-        Args:
-            filters: 검색 필터 딕셔너리
-                {
-                    'date_from': str,
-                    'date_to': str,
-                    'serial_number': str or None,
-                    'mac_address': str or None
-                }
-        """
+    # ==================== 이력 관리 ====================
+
+    def _on_history_search(self, filters: dict):
+        """이력 검색"""
         try:
             history_view = self.main_layout.get_view("history")
-            if not history_view:
-                return
-
-            # DB 조회
-            history = self.db.get_print_history(
-                limit=1000,  # 충분히 큰 값
-                date_from=filters.get('date_from'),
-                date_to=filters.get('date_to'),
-                serial_number=filters.get('serial_number'),
-                mac_address=filters.get('mac_address')
-            )
-
-            # 결과 표시
-            history_view.set_history(history, update_count=True)
-
+            if history_view:
+                history = self.history_service.search(filters)
+                history_view.set_history(history, update_count=True)
         except Exception as e:
-            print(f"이력 검색 오류: {e}")
             self.toast.show_error(f"검색 실패: {str(e)}")
 
     def _on_history_refresh(self):
-        """이력 새로고침 (전체 기록 표시)"""
+        """이력 새로고침"""
         try:
             history_view = self.main_layout.get_view("history")
-            if not history_view:
-                return
-
-            # 전체 이력 조회
-            history = self.db.get_print_history(limit=1000)
-
-            # 결과 표시
-            history_view.set_history(history, update_count=True)
-
+            if history_view:
+                history = self.history_service.get_all()
+                history_view.set_history(history, update_count=True)
         except Exception as e:
-            print(f"이력 새로고침 오류: {e}")
             self.toast.show_error(f"새로고침 실패: {str(e)}")
 
-    def _on_history_delete(self, record_id):
-        """이력 삭제 처리
-
-        Args:
-            record_id: 삭제할 레코드 ID
-        """
+    def _on_history_delete(self, record_id: int):
+        """이력 삭제"""
         try:
-            # DB에서 삭제
-            success = self.db.delete_print_history(record_id)
-
-            if not success:
-                self.toast.show_error("삭제할 항목을 찾을 수 없습니다.")
-                return
-
-            # 삭제 성공 메시지
-            self.toast.show_success("이력이 삭제되었습니다.")
-
-            # 이력 화면 새로고침
-            self._on_history_refresh()
-
-            # 가장 최근 이력의 생산순서로 업데이트
-            latest_history = self.db.get_print_history(limit=1)
-
-            if latest_history:
-                # 시리얼 번호에서 마지막 4자리 (생산순서) 추출
-                serial_number = latest_history[0]['serial_number']
-                # 시리얼 형식: P10-DL0S0H3A0C100001-0
-                # 마지막 하이픈 이전의 마지막 4자리가 생산순서
-                parts = serial_number.split('-')
-                if len(parts) >= 2:
-                    lot_with_seq = parts[1]  # DL0S0H3A0C100001
-                    sequence = lot_with_seq[-4:]  # 0001
-
-                    # LOT 설정 업데이트
-                    self.db.update_lot_config(production_sequence=sequence)
+            if self.history_service.delete(record_id):
+                self.toast.show_success("이력이 삭제되었습니다.")
+                self._on_history_refresh()
+                self._load_home_data()
             else:
-                # 이력이 없으면 0001로 초기화
-                self.db.update_lot_config(production_sequence="0001")
-
-            # 홈 화면의 다음 시리얼 번호 업데이트
-            self.load_home_data()
-
+                self.toast.show_error("삭제할 항목을 찾을 수 없습니다.")
         except Exception as e:
-            print(f"이력 삭제 오류: {e}")
             self.toast.show_error(f"삭제 실패: {str(e)}")
 
-    def _check_printer_status(self):
-        """프린터 연결 상태 체크"""
-        try:
-            zebra_ctrl = ZebraWinController()
-            printers = zebra_ctrl.get_zebra_printers()
+    # ==================== 장치 관리 ====================
 
+    def _check_printer_status(self):
+        """프린터 상태 체크"""
+        try:
+            zebra = ZebraWinController()
+            printers = zebra.get_zebra_printers()
             if printers:
-                # 첫 번째 프린터 정보 표시
-                printer_name = printers[0]
-                self.status_bar.set_printer_status("connected", printer_name)
+                self.status_bar.set_printer_status("connected", printers[0])
             else:
                 self.status_bar.set_printer_status("disconnected")
         except Exception as e:
@@ -567,111 +352,105 @@ class MainWindow(QMainWindow):
             self.status_bar.set_printer_status("disconnected")
 
     def _start_mcu_monitor(self):
-        """MCU 백그라운드 모니터 시작"""
+        """MCU 모니터 시작"""
         try:
-            # 설정에서 시리얼 포트 정보 가져오기
-            serial_port = self.db.get_config('serial_port')
+            serial_port = self.config_service.get_config('serial_port')
             if not serial_port:
-                print("시리얼 포트가 설정되지 않았습니다")
                 self.status_bar.set_mcu_status("disconnected")
                 return
 
-            serial_baudrate = int(self.db.get_config('serial_baudrate') or '115200')
+            baudrate = self.config_service.get_config('serial_baudrate')
+            baudrate = int(baudrate) if baudrate else 115200
 
-            # MCU 모니터 생성
-            self.mcu_monitor = MCUMonitor(serial_port, serial_baudrate)
-
-            # 시그널 연결
-            self.mcu_monitor.connection_status_changed.connect(self._on_mcu_status_changed)
+            self.mcu_monitor = MCUMonitor(serial_port, baudrate)
+            self.mcu_monitor.connection_status_changed.connect(
+                self._on_mcu_status_changed
+            )
             self.mcu_monitor.mac_detected.connect(self._on_mac_detected)
-
-            # 스레드 시작
             self.mcu_monitor.start()
-            print(f"MCU 모니터 시작: {serial_port}")
 
         except Exception as e:
             print(f"MCU 모니터 시작 오류: {e}")
             self.status_bar.set_mcu_status("disconnected")
 
     def _on_mcu_status_changed(self, status: str, detail: str):
-        """MCU 연결 상태 변경"""
+        """MCU 상태 변경"""
         self.status_bar.set_mcu_status(status, detail)
 
     def _on_mac_detected(self, mac_address: str):
         """MAC 주소 감지"""
         self.latest_mac_address = mac_address
-        print(f"✓ MAC 주소 감지: {mac_address}")
 
-        # 홈 화면 업데이트 (MAC 주소 표시)
-        home_view = self.main_layout.get_view("home")
-        if home_view:
-            home_view.set_mac_address(mac_address)
+        home = self.main_layout.get_view("home")
+        if home:
+            home.set_mac_address(mac_address)
 
-        # MAC 감지 시 자동 인쇄
-        auto_print_enabled = self.db.get_config('auto_print_on_mac_detected') == 'true'
-        if auto_print_enabled:
-            print("→ MAC 감지 - 자동 인쇄 실행")
-            # 짧은 딜레이 후 자동 인쇄 (MAC 주소가 UI에 반영될 시간 확보)
-            QTimer.singleShot(100, self._on_print_requested)
+        # 자동 인쇄 확인
+        auto_print = self.config_service.get_config('auto_print_on_mac_detected')
+        if auto_print == 'true':
+            QTimer.singleShot(100, self._on_print)
+
+    # ==================== 백업 ====================
 
     def _start_backup_timer(self):
         """백업 타이머 시작"""
         try:
-            backup_enabled = self.db.get_config('backup_enabled')
-            if backup_enabled == 'true':
-                backup_interval = int(self.db.get_config('backup_interval') or '3600')
-                self.backup_timer.start(backup_interval * 1000)  # 초 -> 밀리초
-                print(f"✓ 자동 백업 활성화: {backup_interval}초 간격")
-            else:
-                print("자동 백업 비활성화됨")
+            if self.config_service.get_config('backup_enabled') == 'true':
+                interval = self.config_service.get_config('backup_interval')
+                interval = int(interval) if interval else 3600
+                self.backup_timer.start(interval * 1000)
         except Exception as e:
             print(f"백업 타이머 시작 오류: {e}")
 
     def _do_backup(self):
-        """자동 백업 실행"""
+        """백업 실행"""
         try:
             from datetime import datetime
-            from pathlib import Path
 
-            # 백업 파일명 생성 (타임스탬프 포함)
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            backup_filename = f"label_printer_{timestamp}.db"
+            filename = f"label_printer_{timestamp}.db"
 
-            # 백업 경로 결정
-            user_backup_path = self.db.get_config('backup_path')
-
-            if user_backup_path and user_backup_path.strip():
-                # 사용자가 지정한 절대 경로
-                backup_dir = Path(user_backup_path)
+            user_path = self.config_service.get_config('backup_path')
+            if user_path and user_path.strip():
+                backup_dir = Path(user_path)
             else:
-                # 기본 경로 (AppData 또는 프로젝트 루트)
                 backup_dir = self.app_base_dir / "backup"
 
-            backup_path = backup_dir / backup_filename
-
-            # 백업 실행
-            self.db.backup(str(backup_path))
-            print(f"✓ 자동 백업 완료: {backup_path}")
+            self.db.backup(str(backup_dir / filename))
 
         except Exception as e:
-            print(f"✗ 자동 백업 실패: {e}")
+            print(f"백업 실패: {e}")
+
+    # ==================== 테마 ====================
+
+    def _on_theme_toggle(self):
+        """테마 토글"""
+        self.theme_manager.toggle_theme()
+
+    def _on_theme_changed(self, theme_mode: str):
+        """테마 변경 처리"""
+        is_dark = theme_mode == "dark"
+        self.main_layout.sidebar.set_theme_mode(is_dark)
+
+        mode_text = "다크 모드" if is_dark else "라이트 모드"
+        self.toast.show_info(f"{mode_text}로 변경되었습니다")
+
+    # ==================== 리소스 정리 ====================
 
     def closeEvent(self, event):
         """윈도우 종료 시 리소스 정리"""
-        # MCU 모니터 정리
         if self.mcu_monitor:
             self.mcu_monitor.stop()
 
-        # 백업 타이머 정리
         if self.backup_timer:
             self.backup_timer.stop()
 
         event.accept()
 
     def _enable_debug_mode(self):
-        """디버그 모드 활성화 (개발용)"""
+        """디버그 모드 활성화"""
         try:
             from .utils import enable_debug_mode
             enable_debug_mode(self, print_tree=True, show_borders=False)
         except ImportError:
-            print("⚠️  디버그 유틸리티를 불러올 수 없습니다.")
+            pass

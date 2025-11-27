@@ -11,6 +11,7 @@ class LotConfigTree(QTreeWidget):
     def __init__(self, theme=None, parent=None):
         super().__init__(parent)
         self.theme = theme or Theme()
+        self.setObjectName("LotConfigTree")  # QSS 셀렉터용
 
         # 트리 설정
         self.setHeaderHidden(True)
@@ -18,33 +19,7 @@ class LotConfigTree(QTreeWidget):
         self.setAnimated(True)
         self.setExpandsOnDoubleClick(False)
 
-        # VSCode 스타일 적용
-        self.setStyleSheet(f"""
-            QTreeWidget {{
-                background-color: {self.theme.colors.GRAY_50};
-                border: none;
-                outline: none;
-                font-size: {self.theme.fonts.BODY}px;
-                color: {self.theme.colors.GRAY_700};
-            }}
-            QTreeWidget::item {{
-                padding: 8px 12px;
-                border: none;
-            }}
-            QTreeWidget::item:hover {{
-                background-color: {self.theme.colors.GRAY_100};
-            }}
-            QTreeWidget::item:selected {{
-                background-color: {self.theme.colors.GRAY_200};
-                color: {self.theme.colors.PRIMARY};
-            }}
-            QTreeWidget::branch {{
-                background-color: {self.theme.colors.GRAY_50};
-            }}
-            QTreeWidget::branch:hover {{
-                background-color: {self.theme.colors.GRAY_100};
-            }}
-        """)
+        # 스타일은 QSS에서 처리 (QTreeWidget[objectName="LotConfigTree"])
 
         # 트리 구조 생성
         self._build_tree()

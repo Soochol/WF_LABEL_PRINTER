@@ -1,0 +1,261 @@
+/* === Global Widget Styles === */
+
+/* Main Window */
+QMainWindow {
+    background-color: @gray-50;
+}
+
+/* Scroll Area */
+QScrollArea {
+    border: none;
+    background-color: @gray-50;
+}
+
+/* Line Edit */
+QLineEdit {
+    background-color: @white;
+    border: @border-width solid @gray-300;
+    border-radius: @radius-sm;
+    padding: 8px 12px;
+    selection-background-color: @primary-light;
+    selection-color: @gray-900;
+}
+
+QLineEdit:focus {
+    border-color: @primary;
+    border-width: 2px;
+}
+
+QLineEdit:disabled {
+    background-color: @gray-100;
+    color: @gray-500;
+}
+
+QLineEdit[readOnly="true"] {
+    background-color: @gray-50;
+}
+
+/* ComboBox */
+QComboBox {
+    background-color: @white;
+    border: @border-width solid @gray-300;
+    border-radius: @radius-sm;
+    padding: 8px 12px;
+    padding-right: 30px;
+}
+
+QComboBox:focus {
+    border-color: @primary;
+    border-width: 2px;
+}
+
+QComboBox:disabled {
+    background-color: @gray-100;
+    color: @gray-500;
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 24px;
+}
+
+QComboBox::down-arrow {
+    width: 12px;
+    height: 12px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: @white;
+    border: @border-width solid @gray-200;
+    border-radius: @radius-sm;
+    selection-background-color: @primary-light;
+    selection-color: @gray-900;
+    padding: 4px;
+}
+
+QComboBox QAbstractItemView::item {
+    padding: 8px 12px;
+    border-radius: @radius-sm;
+}
+
+QComboBox QAbstractItemView::item:hover {
+    background-color: @gray-100;
+}
+
+/* SpinBox */
+QSpinBox, QDoubleSpinBox {
+    background-color: @white;
+    border: @border-width solid @gray-300;
+    border-radius: @radius-sm;
+    padding: 8px 12px;
+}
+
+QSpinBox:focus, QDoubleSpinBox:focus {
+    border-color: @primary;
+}
+
+/* CheckBox */
+QCheckBox {
+    spacing: 8px;
+}
+
+QCheckBox::indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: @border-width solid @gray-300;
+    background-color: @white;
+}
+
+QCheckBox::indicator:hover {
+    border-color: @primary;
+}
+
+QCheckBox::indicator:checked {
+    background-color: @primary;
+    border-color: @primary;
+}
+
+/* Radio Button */
+QRadioButton {
+    spacing: 8px;
+}
+
+QRadioButton::indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    border: @border-width solid @gray-300;
+    background-color: @white;
+}
+
+QRadioButton::indicator:hover {
+    border-color: @primary;
+}
+
+QRadioButton::indicator:checked {
+    background-color: @primary;
+    border-color: @primary;
+}
+
+/* Text Edit */
+QTextEdit, QPlainTextEdit {
+    background-color: @white;
+    border: @border-width solid @gray-300;
+    border-radius: @radius-sm;
+    padding: 8px;
+    selection-background-color: @primary-light;
+}
+
+QTextEdit:focus, QPlainTextEdit:focus {
+    border-color: @primary;
+}
+
+/* Group Box */
+QGroupBox {
+    font-weight: @font-semibold;
+    border: @border-width solid @gray-200;
+    border-radius: @radius;
+    margin-top: 16px;
+    padding-top: 16px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 0 8px;
+    color: @gray-700;
+}
+
+/* Tab Widget */
+QTabWidget::pane {
+    border: @border-width solid @gray-200;
+    border-radius: @radius;
+    background-color: @white;
+}
+
+QTabBar::tab {
+    background-color: @gray-100;
+    border: @border-width solid @gray-200;
+    padding: 8px 16px;
+    margin-right: 2px;
+}
+
+QTabBar::tab:selected {
+    background-color: @white;
+    border-bottom-color: @white;
+}
+
+QTabBar::tab:hover:!selected {
+    background-color: @gray-200;
+}
+
+/* Progress Bar */
+QProgressBar {
+    background-color: @gray-200;
+    border: none;
+    border-radius: 4px;
+    height: 8px;
+    text-align: center;
+}
+
+QProgressBar::chunk {
+    background-color: @primary;
+    border-radius: 4px;
+}
+
+/* Slider */
+QSlider::groove:horizontal {
+    background-color: @gray-200;
+    height: 6px;
+    border-radius: 3px;
+}
+
+QSlider::handle:horizontal {
+    background-color: @primary;
+    width: 16px;
+    height: 16px;
+    margin: -5px 0;
+    border-radius: 8px;
+}
+
+QSlider::handle:horizontal:hover {
+    background-color: @primary-dark;
+}
+
+/* Menu */
+QMenu {
+    background-color: @white;
+    border: @border-width solid @gray-200;
+    border-radius: @radius;
+    padding: 4px;
+}
+
+QMenu::item {
+    padding: 8px 24px;
+    border-radius: @radius-sm;
+}
+
+QMenu::item:selected {
+    background-color: @gray-100;
+}
+
+QMenu::separator {
+    height: 1px;
+    background-color: @gray-200;
+    margin: 4px 8px;
+}
+
+/* Message Box */
+QMessageBox {
+    background-color: @white;
+}
+
+QMessageBox QLabel {
+    color: @gray-900;
+}
+
+/* Main Stack Widget */
+QStackedWidget[objectName="MainStack"] {
+    background-color: @gray-50;
+}

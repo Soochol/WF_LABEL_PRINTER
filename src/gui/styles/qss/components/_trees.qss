@@ -1,0 +1,105 @@
+/* === Tree Component Styles === */
+
+/* Settings Tree */
+QTreeWidget[objectName="SettingsTree"],
+QTreeView[objectName="SettingsTree"] {
+    background-color: @white;
+    border: @border-width solid @gray-200;
+    border-radius: @radius;
+    outline: none;
+}
+
+QTreeWidget[objectName="SettingsTree"]::item,
+QTreeView[objectName="SettingsTree"]::item {
+    padding: 10px 12px;
+    border-bottom: @border-width solid @gray-100;
+    border-radius: 0;
+}
+
+QTreeWidget[objectName="SettingsTree"]::item:hover,
+QTreeView[objectName="SettingsTree"]::item:hover {
+    background-color: @gray-50;
+}
+
+QTreeWidget[objectName="SettingsTree"]::item:selected,
+QTreeView[objectName="SettingsTree"]::item:selected {
+    background-color: @primary-light;
+    color: @gray-900;
+}
+
+/* LOT Config Tree */
+QTreeWidget[objectName="LotConfigTree"],
+QTreeView[objectName="LotConfigTree"] {
+    background-color: @white;
+    border: @border-width solid @gray-200;
+    border-radius: @radius;
+    outline: none;
+}
+
+QTreeWidget[objectName="LotConfigTree"]::item,
+QTreeView[objectName="LotConfigTree"]::item {
+    padding: 10px 12px;
+    border-bottom: @border-width solid @gray-100;
+}
+
+QTreeWidget[objectName="LotConfigTree"]::item:hover,
+QTreeView[objectName="LotConfigTree"]::item:hover {
+    background-color: @gray-50;
+}
+
+QTreeWidget[objectName="LotConfigTree"]::item:selected,
+QTreeView[objectName="LotConfigTree"]::item:selected {
+    background-color: @primary-light;
+    color: @gray-900;
+}
+
+/* Tree Branch Indicators */
+QTreeWidget::branch,
+QTreeView::branch {
+    background-color: transparent;
+}
+
+QTreeWidget::branch:has-children:!has-siblings:closed,
+QTreeWidget::branch:closed:has-children:has-siblings,
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+    border-image: none;
+}
+
+QTreeWidget::branch:open:has-children:!has-siblings,
+QTreeWidget::branch:open:has-children:has-siblings,
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings {
+    border-image: none;
+}
+
+/* Tree Header (if visible) */
+QTreeWidget QHeaderView::section,
+QTreeView QHeaderView::section {
+    background-color: @gray-100;
+    color: @gray-700;
+    font-weight: @font-semibold;
+    padding: 8px 12px;
+    border: none;
+    border-bottom: @border-width solid @gray-200;
+}
+
+/* Folder/Category Style */
+QTreeWidget::item[data-type="category"],
+QTreeView::item[data-type="category"] {
+    font-weight: @font-semibold;
+    color: @gray-800;
+}
+
+/* Leaf/Item Style */
+QTreeWidget::item[data-type="item"],
+QTreeView::item[data-type="item"] {
+    padding-left: 24px;
+    color: @gray-600;
+}
+
+/* Disabled Tree Item */
+QTreeWidget::item:disabled,
+QTreeView::item:disabled {
+    color: @gray-400;
+}

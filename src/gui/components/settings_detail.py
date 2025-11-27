@@ -35,12 +35,7 @@ class SettingsDetailPanel(QStackedWidget):
         # 스크롤 영역
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setStyleSheet(f"""
-            QScrollArea {{
-                border: none;
-                background-color: {self.theme.colors.GRAY_50};
-            }}
-        """)
+        scroll.setObjectName("DetailScrollArea")  # QSS 셀렉터용
 
         # 컨텐츠 위젯
         content = QWidget()
@@ -50,12 +45,8 @@ class SettingsDetailPanel(QStackedWidget):
 
         # 타이틀
         title_label = QLabel(title)
-        title_label.setStyleSheet(f"""
-            font-size: {self.theme.fonts.H3}px;
-            font-weight: {self.theme.fonts.BOLD};
-            color: {self.theme.colors.GRAY_900};
-            margin-bottom: 24px;
-        """)
+        title_label.setObjectName("DetailPanelTitle")  # QSS 셀렉터용
+        title_label.setProperty("data-role", "panel-title")  # QSS 셀렉터용
         content_layout.addWidget(title_label)
 
         scroll.setWidget(content)

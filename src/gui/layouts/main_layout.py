@@ -22,9 +22,9 @@ class MainLayout(ComponentBase):
         self.sidebar = Sidebar(self.theme)
         self.sidebar.page_changed.connect(self._on_page_changed)
 
-        # 뷰 스택
+        # 뷰 스택 (스타일은 QSS에서 처리)
         self.stack = QStackedWidget()
-        self.stack.setStyleSheet(f"background-color: {self.theme.colors.GRAY_50};")
+        self.stack.setObjectName("MainStack")
 
         # 뷰 생성
         self.home_view = HomeView(self.theme)
