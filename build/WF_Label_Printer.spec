@@ -102,9 +102,9 @@ if dist_path.exists():
     shutil.move(str(dist_path), str(build_output))
 
     print(f"\n========================================")
-    print(f"빌드 완료!")
+    print(f"Build complete!")
     print(f"========================================")
-    print(f"실행 파일: {build_output / 'WF_Label_Printer.exe'}")
-    print(f"배포 폴더: {build_output}")
+    print(f"EXE: {build_output / 'WF_Label_Printer.exe'}")
+    print(f"Dist: {build_output}")
     print(f"========================================\n")
 
