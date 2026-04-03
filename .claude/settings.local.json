@@ -4,7 +4,17 @@
       "Bash(uv pip install:*)",
       "Bash(if exist buildWF_Label_Printer rmdir /s /q buildWF_Label_Printer)",
       "Bash(if exist dist rmdir /s /q dist)",
-      "Bash(uv run pyinstaller:*)"
+      "Bash(uv run pyinstaller:*)",
+      "Bash(rm -rf \"c:/code/WF_LABEL_PRINTER/build/scripts\")",
+      "Bash(mkdir -p \"c:/code/WF_LABEL_PRINTER/build/github\" \"c:/code/WF_LABEL_PRINTER/build/local\")",
+      "Bash(where py:*)",
+      "Bash(py --version)",
+      "Read(//c/Users/USER/AppData/Local/Programs/**)",
+      "Bash(ls /c/Python*)",
+      "Bash(cmd /c \"reg query HKLM\\\\SOFTWARE\\\\Python\\\\PythonCore /s 2>nul | findstr InstallPath\")",
+      "Bash(cmd /c \"reg query HKCU\\\\SOFTWARE\\\\Python\\\\PythonCore /s 2>nul\")",
+      "Bash(cmd /c \"set PATH\")",
+      "Bash(cmd /c \"c:\\\\code\\\\WF_LABEL_PRINTER\\\\build\\\\local\\\\build.bat\")"
     ],
     "deny": [],
     "ask": []
