@@ -17,6 +17,7 @@ datas = [
 
 # Hidden imports (동적 import 되는 모듈들)
 hiddenimports = [
+    'pkgutil',
     'PyQt6.QtCore',
     'PyQt6.QtGui',
     'PyQt6.QtWidgets',
