@@ -1,0 +1,39 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # 수동 실행 가능
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install PyQt6==6.6.1 pyusb==1.2.1 pyserial==3.5 python-dateutil==2.8.2 pyyaml==6.0.1
+          pip install pywin32>=305
+
+      - name: Build with PyInstaller
+        run: |
+          cd build
+          pyinstaller WF_Label_Printer.spec --clean
+        shell: cmd
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WF_Label_Printer
+          path: build/WF_Label_Printer/
+          retention-days: 30

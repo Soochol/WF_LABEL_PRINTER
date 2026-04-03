@@ -12,7 +12,7 @@ project_root = Path.cwd()
 
 # 수집할 데이터 파일들
 datas = [
-    ('../templates', 'templates'),  # PRN 템플릿 파일들
+    ('../prn', 'prn'),  # PRN 템플릿 파일들
 ]
 
 # Hidden imports (동적 import 되는 모듈들)
@@ -30,7 +30,7 @@ hiddenimports = [
 
 # 분석 단계
 a = Analysis(
-    ['../gui_main.py'],  # build 폴더에서 실행되므로 상위 디렉토리 참조
+    ['../main.py'],  # build 폴더에서 실행되므로 상위 디렉토리 참조
     pathex=[str(Path('..').resolve())],  # 프로젝트 루트를 경로에 추가
     binaries=[],
     datas=datas,
