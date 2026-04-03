@@ -52,3 +52,7 @@ debug_*.zpl
 
 # Claude settings (local only)
 .claude/settings.local.json
+
+# OS/tool artifacts
+prn.tar.gz
+.omc/
