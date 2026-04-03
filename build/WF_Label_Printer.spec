@@ -6,14 +6,18 @@ Windows 실행 파일 빌드 설정
 
 import sys
 from pathlib import Path
+from PyInstaller.utils.hooks import collect_all
 
 # 프로젝트 루트 경로
 project_root = Path.cwd()
 
+# PyQt6 전체 수집 (DLL 포함)
+qt_datas, qt_binaries, qt_hiddenimports = collect_all('PyQt6')
+
 # 수집할 데이터 파일들
 datas = [
     ('../prns', 'prns'),  # PRN 템플릿 파일들
-]
+] + qt_datas
 
 # Hidden imports (동적 import 되는 모듈들)
 hiddenimports = [
@@ -33,9 +37,9 @@ hiddenimports = [
 a = Analysis(
     ['../main.py'],  # build 폴더에서 실행되므로 상위 디렉토리 참조
     pathex=[str(Path('..').resolve())],  # 프로젝트 루트를 경로에 추가
-    binaries=[],
+    binaries=qt_binaries,
     datas=datas,
-    hiddenimports=hiddenimports,
+    hiddenimports=hiddenimports + qt_hiddenimports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
