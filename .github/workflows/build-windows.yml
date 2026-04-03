@@ -35,5 +35,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: WF_Label_Printer
-          path: build/WF_Label_Printer/
+          path: build/build/WF_Label_Printer/
           retention-days: 30
