@@ -11,8 +11,11 @@ from PyInstaller.utils.hooks import collect_all
 # 프로젝트 루트 경로
 project_root = Path.cwd()
 
-# PyQt6 전체 수집 (DLL 포함)
+# PyQt6 전체 수집 (DLL + sip 포함)
 qt_datas, qt_binaries, qt_hiddenimports = collect_all('PyQt6')
+sip_datas, sip_binaries, sip_hiddenimports = collect_all('PyQt6.sip')
+qt_binaries += sip_binaries
+qt_hiddenimports += sip_hiddenimports
 
 # 수집할 데이터 파일들
 datas = [
