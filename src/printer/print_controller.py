@@ -89,7 +89,7 @@ class PrintController:
                 serial_number = self._generate_serial_number(lot_config)
 
                 # 2. PRN 템플릿 로드
-                template_path = self.project_root / "prn" / template_name
+                template_path = self.project_root / "prns" / template_name
                 zpl_data = self._load_and_replace_template(
                     template_path,
                     serial_number,

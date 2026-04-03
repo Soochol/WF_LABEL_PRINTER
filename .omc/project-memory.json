@@ -1,0 +1,334 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1775183580006,
+  "projectRoot": "/home/dev/code/WF_LABEL_PRINTER",
+  "techStack": {
+    "languages": [
+      {
+        "name": "Python",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "pyproject.toml",
+          "requirements.txt"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "pytest",
+        "version": null,
+        "category": "testing"
+      }
+    ],
+    "packageManager": "pip",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": "pytest",
+    "lintCommand": "ruff check",
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": "snake_case",
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs",
+      "src",
+      "tests"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "build": {
+      "path": "build",
+      "purpose": "Build output",
+      "fileCount": 3,
+      "lastAccessed": 1775183580002,
+      "keyFiles": [
+        "DEPLOYMENT.md",
+        "WF_Label_Printer.spec",
+        "build.bat"
+      ]
+    },
+    "data": {
+      "path": "data",
+      "purpose": "Data files",
+      "fileCount": 1,
+      "lastAccessed": 1775183580002,
+      "keyFiles": []
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 7,
+      "lastAccessed": 1775183580003,
+      "keyFiles": [
+        "01_system_architecture.md",
+        "02_prn_file_analysis.md",
+        "03_serial_number_structure.md",
+        "04_database_schema.md",
+        "05_api_design.md"
+      ]
+    },
+    "logs": {
+      "path": "logs",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1775183580004,
+      "keyFiles": []
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 2,
+      "lastAccessed": 1775183580004,
+      "keyFiles": [
+        "__init__.py",
+        "main.py"
+      ]
+    },
+    "tests": {
+      "path": "tests",
+      "purpose": "Test files",
+      "fileCount": 12,
+      "lastAccessed": 1775183580005,
+      "keyFiles": [
+        "__init__.py",
+        "quick_test.py",
+        "test_barcode_issue.py",
+        "test_database.py",
+        "test_gui_simple.py"
+      ]
+    },
+    "build/scripts": {
+      "path": "build/scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 5,
+      "lastAccessed": 1775183580005,
+      "keyFiles": [
+        "build.bat",
+        "build_all.bat",
+        "build_app.spec"
+      ]
+    },
+    "src/utils": {
+      "path": "src/utils",
+      "purpose": "Utility functions",
+      "fileCount": 5,
+      "lastAccessed": 1775183580005,
+      "keyFiles": [
+        "__init__.py",
+        "config_manager.py",
+        "exceptions.py"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "src/printer/print_controller.py",
+      "accessCount": 8,
+      "lastAccessed": 1775189410788,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 5,
+      "lastAccessed": 1775186289836,
+      "type": "directory"
+    },
+    {
+      "path": "prn/PSA_LABEL_ZPL_with_mac_address.prn",
+      "accessCount": 5,
+      "lastAccessed": 1775188650504,
+      "type": "file"
+    },
+    {
+      "path": "src/gui/main_window.py",
+      "accessCount": 4,
+      "lastAccessed": 1775183789519,
+      "type": "file"
+    },
+    {
+      "path": "src/gui/views/settings_view.py",
+      "accessCount": 4,
+      "lastAccessed": 1775185213878,
+      "type": "file"
+    },
+    {
+      "path": "src/gui/services/print_service.py",
+      "accessCount": 4,
+      "lastAccessed": 1775185244396,
+      "type": "file"
+    },
+    {
+      "path": "src/gui/components/settings_detail.py",
+      "accessCount": 4,
+      "lastAccessed": 1775189412090,
+      "type": "file"
+    },
+    {
+      "path": "src/database/db_manager.py",
+      "accessCount": 3,
+      "lastAccessed": 1775183738277,
+      "type": "file"
+    },
+    {
+      "path": "src/database/models.py",
+      "accessCount": 3,
+      "lastAccessed": 1775185118665,
+      "type": "file"
+    },
+    {
+      "path": "src/gui/services/configuration_service.py",
+      "accessCount": 3,
+      "lastAccessed": 1775185146914,
+      "type": "file"
+    },
+    {
+      "path": "src",
+      "accessCount": 3,
+      "lastAccessed": 1775189391632,
+      "type": "directory"
+    },
+    {
+      "path": "src/utils/config_manager.py",
+      "accessCount": 2,
+      "lastAccessed": 1775183722506,
+      "type": "file"
+    },
+    {
+      "path": "config.yaml",
+      "accessCount": 2,
+      "lastAccessed": 1775183728569,
+      "type": "file"
+    },
+    {
+      "path": "src/gui/components/settings_tree.py",
+      "accessCount": 2,
+      "lastAccessed": 1775183783322,
+      "type": "file"
+    },
+    {
+      "path": "src/printer/prn_parser.py",
+      "accessCount": 2,
+      "lastAccessed": 1775183806877,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_print_copies.py",
+      "accessCount": 2,
+      "lastAccessed": 1775185468709,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 1,
+      "lastAccessed": 1775183711299,
+      "type": "file"
+    },
+    {
+      "path": "pyproject.toml",
+      "accessCount": 1,
+      "lastAccessed": 1775183711495,
+      "type": "file"
+    },
+    {
+      "path": "src/printer/zebra_win_controller.py",
+      "accessCount": 1,
+      "lastAccessed": 1775183716950,
+      "type": "file"
+    },
+    {
+      "path": "src/main.py",
+      "accessCount": 1,
+      "lastAccessed": 1775183719488,
+      "type": "file"
+    },
+    {
+      "path": "src/gui/views/print_view.py",
+      "accessCount": 1,
+      "lastAccessed": 1775183719718,
+      "type": "file"
+    },
+    {
+      "path": "src/gui/components/setting_item.py",
+      "accessCount": 1,
+      "lastAccessed": 1775183725331,
+      "type": "file"
+    },
+    {
+      "path": "src/gui/views/home_view.py",
+      "accessCount": 1,
+      "lastAccessed": 1775183726721,
+      "type": "file"
+    },
+    {
+      "path": "docs/01_system_architecture.md",
+      "accessCount": 1,
+      "lastAccessed": 1775183728773,
+      "type": "file"
+    },
+    {
+      "path": "docs/02_prn_file_analysis.md",
+      "accessCount": 1,
+      "lastAccessed": 1775183728828,
+      "type": "file"
+    },
+    {
+      "path": "main.py",
+      "accessCount": 1,
+      "lastAccessed": 1775183728975,
+      "type": "file"
+    },
+    {
+      "path": "src/utils/serial_number_generator.py",
+      "accessCount": 1,
+      "lastAccessed": 1775183732617,
+      "type": "file"
+    },
+    {
+      "path": "src/gui/components/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1775183740657,
+      "type": "file"
+    },
+    {
+      "path": "src/gui/core/__init__.py",
+      "accessCount": 1,
+      "lastAccessed": 1775183743632,
+      "type": "file"
+    },
+    {
+      "path": "src/gui/components/lot_config_detail.py",
+      "accessCount": 1,
+      "lastAccessed": 1775183745797,
+      "type": "file"
+    },
+    {
+      "path": "tests/test_prn_parser.py",
+      "accessCount": 1,
+      "lastAccessed": 1775185323232,
+      "type": "file"
+    },
+    {
+      "path": "prn/PSA_LABEL_ZPL_with_mac_address_no_qr.prn",
+      "accessCount": 1,
+      "lastAccessed": 1775188677293,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

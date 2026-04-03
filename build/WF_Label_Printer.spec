@@ -12,7 +12,7 @@ project_root = Path.cwd()
 
 # 수집할 데이터 파일들
 datas = [
-    ('../prn', 'prn'),  # PRN 템플릿 파일들
+    ('../prns', 'prns'),  # PRN 템플릿 파일들
 ]
 
 # Hidden imports (동적 import 되는 모듈들)

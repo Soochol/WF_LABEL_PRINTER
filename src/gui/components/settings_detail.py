@@ -356,7 +356,7 @@ class SettingsDetailPanel(QStackedWidget):
         try:
             current_file = Path(__file__)
             project_root = current_file.parent.parent.parent.parent
-            prn_folder = project_root / "prn"
+            prn_folder = project_root / "prns"
 
             if not prn_folder.exists():
                 return []

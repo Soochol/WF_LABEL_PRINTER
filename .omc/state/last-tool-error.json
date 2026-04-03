@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"python3 -m pytest tests/test_print_copies.py -v 2>&1\",\"description\":\"Run print copies tests\"}",
+  "error": "Exit code 2\n============================= test session starts ==============================\nplatform linux -- Python 3.13.7, pytest-9.0.2, pluggy-1.6.0 -- /usr/bin/python3\ncachedir: .pytest_cache\nrootdir: /home/dev/code/WF_LABEL_PRINTER\nconfigfile: pyproject.toml\nplugins: typeguard-4.4.2\ncollecting ... collected 0 items / 1 error\n\n==================================== ERRORS ====================================\n_________________ ERROR collecting tests/test_print_copies.py __________________\nImpo...",
+  "timestamp": "2026-04-03T03:04:18.743Z",
+  "retry_count": 3
+}
