@@ -176,6 +176,18 @@ class SettingsDetailPanel(QStackedWidget):
         self.auto_print_on_mac_item.value_changed.connect(self._on_auto_print_mac_combo_changed)
         layout.addWidget(self.auto_print_on_mac_item)
 
+        # 인쇄 매수
+        self.print_copies_item = SelectSettingItem(
+            "print_copies",
+            "Print Copies",
+            ["1", "2", "3", "4", "5"],
+            default="1",
+            description="한 번 인쇄 시 출력할 라벨 매수를 설정합니다.",
+            theme=self.theme
+        )
+        self.print_copies_item.value_changed.connect(self.setting_changed.emit)
+        layout.addWidget(self.print_copies_item)
+
         layout.addStretch()
 
         self.addWidget(panel)

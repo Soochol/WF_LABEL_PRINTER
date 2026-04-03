@@ -81,6 +81,7 @@ class PrintService:
         printer_selection = self.db.get_config('printer_selection') or '자동 검색 (권장)'
         prn_template = self.db.get_config('prn_template')
         use_mac_in_label = self.db.get_config('use_mac_in_label') != 'false'
+        print_copies = int(self.db.get_config('print_copies') or '1')
 
         if not prn_template:
             raise ValueError("PRN 템플릿이 설정되지 않았습니다. 설정 화면에서 템플릿을 선택하세요.")
@@ -103,7 +104,8 @@ class PrintService:
             template_name=prn_template,
             printer_selection=printer_selection,
             test_mode=test_mode,
-            use_mac_in_label=use_mac_in_label
+            use_mac_in_label=use_mac_in_label,
+            print_copies=print_copies
         )
 
     def save_print_result(

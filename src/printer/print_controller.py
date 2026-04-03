@@ -1,4 +1,5 @@
 """인쇄 컨트롤러 - 인쇄 프로세스 오케스트레이션"""
+import re
 from pathlib import Path
 from datetime import datetime
 from ..utils.serial_number_generator import SerialNumberGenerator
@@ -47,7 +48,8 @@ class PrintController:
         template_name: str,
         printer_selection: str = "자동 검색 (권장)",
         test_mode: bool = False,
-        use_mac_in_label: bool = True
+        use_mac_in_label: bool = True,
+        print_copies: int = 1
     ) -> dict:
         """
         라벨 인쇄
@@ -72,6 +74,7 @@ class PrintController:
             if test_mode:
                 # 테스트 모드: 간단한 "ZEBRA TEST LABEL" 문구만 출력
                 zpl_data = self._get_test_zpl_data()
+                zpl_data = self._inject_print_quantity(zpl_data, print_copies)
                 self._send_to_printer(zpl_data, printer_selection)
 
                 return {
@@ -94,7 +97,10 @@ class PrintController:
                     use_mac_in_label
                 )
 
-                # 3. 프린터로 전송
+                # 3. 인쇄 매수 적용
+                zpl_data = self._inject_print_quantity(zpl_data, print_copies)
+
+                # 4. 프린터로 전송
                 self._send_to_printer(zpl_data, printer_selection)
 
                 return {
@@ -111,6 +117,18 @@ class PrintController:
                 'mac_address': mac_address if not test_mode else 'TEST-MODE',
                 'message': f'인쇄 실패: {str(e)}'
             }
+
+    def _inject_print_quantity(self, zpl_data: str, copies: int) -> str:
+        """ZPL 데이터에 인쇄 매수 설정 (^PQ 명령)"""
+        pq_command = f'^PQ{copies},,,Y'
+        # 기존 ^PQ 명령이 있으면 교체
+        if re.search(r'\^PQ\d+', zpl_data):
+            return re.sub(r'\^PQ\d+[^\n]*', pq_command, zpl_data)
+        # 없으면 마지막 ^XZ 앞에 삽입
+        last_xz = zpl_data.rfind('^XZ')
+        if last_xz != -1:
+            return zpl_data[:last_xz] + pq_command + '\n' + zpl_data[last_xz:]
+        return zpl_data
 
     def _generate_serial_number(self, lot_config: dict) -> str:
         """시리얼 번호 생성"""

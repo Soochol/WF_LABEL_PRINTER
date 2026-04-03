@@ -158,7 +158,8 @@ class SettingsView(ComponentBase):
                 'true' if self.detail_panel.backup_enabled_item.get_value() == '사용'
                 else 'false'
             ),
-            'backup_interval': self.detail_panel.backup_interval_item.get_value()
+            'backup_interval': self.detail_panel.backup_interval_item.get_value(),
+            'print_copies': self.detail_panel.print_copies_item.get_value()
         }
 
     def set_settings(self, settings):
@@ -223,6 +224,12 @@ class SettingsView(ComponentBase):
         if 'backup_interval' in settings:
             self.detail_panel.backup_interval_item.set_value(
                 settings['backup_interval']
+            )
+
+        # 인쇄 매수
+        if 'print_copies' in settings:
+            self.detail_panel.print_copies_item.set_value(
+                settings['print_copies']
             )
 
     def _extract_com_port(self, port_value):

@@ -112,7 +112,8 @@ INSERT OR IGNORE INTO app_config (key, value, description) VALUES
     ('backup_enabled', 'true', 'DB 백업 활성화'),
     ('backup_interval', '3600', '백업 주기 (초)'),
     ('backup_path', '', '백업 폴더 경로 (비어있으면 기본 경로 사용)'),
-    ('last_backup', '', '마지막 백업 시각');
+    ('last_backup', '', '마지막 백업 시각'),
+    ('print_copies', '1', '인쇄 매수 (1~5)');
 
 -- 코드 마스터 초기 데이터
 -- 모델명 코드

@@ -17,7 +17,8 @@ class ConfigurationService:
         'printer_selection', 'prn_template', 'serial_port',
         'serial_baudrate', 'serial_timeout', 'auto_increment',
         'use_mac_in_label', 'auto_print_on_mac_detected',
-        'backup_enabled', 'backup_interval', 'backup_path'
+        'backup_enabled', 'backup_interval', 'backup_path',
+        'print_copies'
     ]
 
     def __init__(self, db):
