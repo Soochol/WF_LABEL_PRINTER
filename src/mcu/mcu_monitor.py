@@ -5,6 +5,8 @@ import serial
 import serial.tools.list_ports
 from PyQt6.QtCore import QThread, pyqtSignal
 
+from ..serial_comm.mac_parser import MACParser
+
 
 class MCUMonitor(QThread):
     """MCU 백그라운드 모니터 스레드"""
@@ -90,10 +92,14 @@ class MCUMonitor(QThread):
                 line = self.ser.readline().decode('utf-8', errors='ignore').strip()
 
                 if line:
-                    # MAC 주소 패턴 검색
-                    match = self.mac_pattern.search(line)
-                    if match:
-                        mac_address = match.group(1)
+                    # 부팅 로그의 device id와 기존 MQTT topic 형식 모두 지원
+                    mac_address = MACParser.parse(line)
+                    if not mac_address:
+                        match = self.mac_pattern.search(line)
+                        if match:
+                            mac_address = match.group(1).upper()
+
+                    if mac_address:
                         print(f"✓ MAC 감지: {mac_address}")
                         self.mac_detected.emit(mac_address)
 
