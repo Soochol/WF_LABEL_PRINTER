@@ -3,6 +3,8 @@ name: Build Windows EXE
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:  # 수동 실행 가능
 
 jobs:
@@ -23,13 +25,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller
           pip install PyQt6==6.5.3 PyQt6-Qt6==6.5.3 PyQt6-sip pyusb==1.2.1 pyserial==3.5 python-dateutil==2.8.2 pyyaml==6.0.1
-          pip install pywin32>=305
+          pip install "pywin32>=305" zebra==0.2.1
+
+      - name: Check application imports
+        run: python main.py --check-imports
 
       - name: Build with PyInstaller
         run: |
           cd build/github
           pyinstaller WF_Label_Printer.spec --clean
         shell: cmd
+
+      - name: Check packaged application imports
+        timeout-minutes: 1
+        run: |
+          $process = Start-Process -FilePath "build/github/dist/WF_Label_Printer/WF_Label_Printer.exe" -ArgumentList "--check-imports" -Wait -PassThru
+          if ($process.ExitCode -ne 0) {
+            if (Test-Path "startup_check_error.log") {
+              Get-Content "startup_check_error.log"
+            }
+            throw "Packaged application import check failed: $($process.ExitCode)"
+          }
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

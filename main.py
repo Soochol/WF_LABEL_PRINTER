@@ -35,9 +35,16 @@ def _setup_exception_hook():
 
 _setup_exception_hook()
 
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import Qt, QTimer
-from src.gui import MainWindow
+try:
+    from PyQt6.QtWidgets import QApplication
+    from PyQt6.QtCore import Qt, QTimer
+    from src.gui import MainWindow
+except Exception:
+    if "--check-imports" in sys.argv:
+        from pathlib import Path
+        Path("startup_check_error.log").write_text(traceback.format_exc(), encoding="utf-8")
+        sys.exit(1)
+    raise
 
 
 def main():
@@ -105,4 +112,7 @@ def main():
 
 
 if __name__ == "__main__":
+    # CI에서 소스 및 패키징된 EXE의 import를 장치 연결 없이 검증
+    if "--check-imports" in sys.argv:
+        sys.exit(0)
     main()
